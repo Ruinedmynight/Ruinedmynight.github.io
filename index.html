@@ -71,10 +71,10 @@
                     const postCard = document.createElement('article');
                     postCard.className = 'post-card';
                     postCard.innerHTML = `
-                        <h3><a href="posts/${post.slug}.html">${title}</a></h3>
+                        <h3><a href="post.html?slug=${post.slug}">${title}</a></h3>
                         <p class="post-meta">${meta}</p>
                         <p>${excerpt}</p>
-                        <a href="posts/${post.slug}.html" class="read-more">阅读更多</a>
+                        <a href="post.html?slug=${post.slug}" class="read-more">阅读更多</a>
                     `;
                     
                     // 添加到页面
