@@ -72,6 +72,7 @@ main {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    flex: 1;
 }
 
 /* 英雄区域 */
@@ -217,7 +218,7 @@ footer {
     color: #fff;
     text-align: center;
     padding: 2rem 0;
-    margin-top: 2rem;
+    margin-top: auto;
 }
 
 /* 响应式设计 */
