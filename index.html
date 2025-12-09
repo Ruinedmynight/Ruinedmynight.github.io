@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的博客</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -28,14 +29,7 @@
         </section>
 
         <!-- 博客文章列表 -->
-        <section class="posts">
-            <article class="post-card">
-                <h3><a href="posts/first-post.html">我的第一篇博客</a></h3>
-                <p class="post-meta">2024-01-01 | 技术分享</p>
-                <p>这是我的第一篇博客文章，记录了我创建博客的过程和一些技术思考...</p>
-                <a href="posts/first-post.html" class="read-more">阅读更多</a>
-            </article>
-        </section>
+        <section class="posts" id="posts-container"></section>
     </main>
 
     <!-- 页脚 -->
@@ -44,5 +38,57 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script>
+        // 文章列表数据
+        const posts = [
+            { slug: 'first-post', filename: 'posts/first-post.md' }
+        ];
+
+        // 生成文章卡片
+        function generatePostCard(post) {
+            fetch(post.filename)
+                .then(response => response.text())
+                .then(text => {
+                    const lines = text.split('\n');
+                    
+                    // 提取标题
+                    const title = lines[0].replace('# ', '');
+                    
+                    // 提取元数据
+                    const meta = lines[2];
+                    
+                    // 提取摘要（前100个字符）
+                    let content = lines.slice(4).join('\n');
+                    // 移除markdown标记获取纯文本
+                    const plainText = content.replace(/#+\s/g, '')
+                                            .replace(/\*\*(.*?)\*\*/g, '$1')
+                                            .replace(/\*(.*?)\*/g, '$1')
+                                            .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+                                            .replace(/\n/g, ' ');
+                    const excerpt = plainText.substring(0, 100) + '...';
+                    
+                    // 创建文章卡片
+                    const postCard = document.createElement('article');
+                    postCard.className = 'post-card';
+                    postCard.innerHTML = `
+                        <h3><a href="posts/${post.slug}.html">${title}</a></h3>
+                        <p class="post-meta">${meta}</p>
+                        <p>${excerpt}</p>
+                        <a href="posts/${post.slug}.html" class="read-more">阅读更多</a>
+                    `;
+                    
+                    // 添加到页面
+                    document.getElementById('posts-container').appendChild(postCard);
+                })
+                .catch(error => {
+                    console.error('加载文章失败:', error);
+                });
+        }
+
+        // 加载所有文章
+        posts.forEach(post => {
+            generatePostCard(post);
+        });
+    </script>
 </body>
 </html>
