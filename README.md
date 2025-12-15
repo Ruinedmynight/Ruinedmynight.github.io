@@ -1,12 +1,13 @@
 # 我的博客
 
-这是一个使用纯HTML、CSS和JavaScript创建的简单博客，可以部署到GitHub Pages上。
+这是一个使用纯HTML、CSS和JavaScript创建的现代化博客，可以部署到GitHub Pages上。
 
 ## 技术栈
 
 - **HTML5** - 页面结构
 - **CSS3** - 样式设计和响应式布局
 - **JavaScript** - 交互功能
+- **marked.js** - Markdown渲染
 - **GitHub Pages** - 部署和托管
 
 ## 项目结构
@@ -18,21 +19,28 @@
 ├── js/
 │   └── main.js            # JavaScript交互功能
 ├── posts/
-│   └── first-post.html    # 示例博客文章
+│   └── first-post.md      # 示例博客文章 (Markdown格式)
 ├── .gitignore             # Git忽略文件
-├── about.html             # 关于页面
+├── README.md              # 项目说明文档
+├── about.html             # 关于页面 (已移除)
 ├── index.html             # 首页
-└── README.md              # 项目说明文档
+└── post.html              # 文章详情页模板
 ```
 
 ## 功能特点
 
-- 简洁美观的设计
+- 现代化、精美的设计
 - 响应式布局，适配各种设备
 - 平滑滚动效果
-- 悬停动画
+- 丰富的悬停动画
 - 导航栏滚动变化效果
 - 页面加载动画
+- 支持Markdown格式文章
+- 通用文章详情页模板
+- 带有渐变背景的英雄区域
+- 精美的文章卡片设计
+- 优化的文章阅读体验
+- 现代化的页脚设计
 
 ## 本地测试
 
@@ -114,22 +122,36 @@ https://你的GitHub用户名.github.io
 
 ## 添加新文章
 
-1. 在 `posts/` 目录下创建新的HTML文件
-2. 复制 `posts/first-post.html` 的内容作为模板
-3. 修改标题、内容和日期
-4. 在 `index.html` 中添加新文章的链接
+1. 在 `posts/` 目录下创建新的Markdown文件（例如：`new-post.md`）
+2. 按照以下格式编写Markdown内容：
+   ```markdown
+   # 文章标题
+   
+   2024-01-01 | 分类
+   
+   正文内容...
+   ```
+3. 在 `index.html` 中的 `posts` 数组中添加新文章信息：
+   ```javascript
+   const posts = [
+       { slug: 'first-post', filename: 'posts/first-post.md' },
+       { slug: 'new-post', filename: 'posts/new-post.md' }
+   ];
+   ```
 
 ## 自定义样式
 
 你可以修改 `css/style.css` 文件来自定义博客的样式，包括：
-- 颜色方案
+- 颜色方案（通过CSS变量）
 - 字体
 - 布局
 - 动画效果
+- 卡片样式
+- 文章详情页样式
 
 ## 自定义导航栏
 
-你可以修改 `index.html`、`about.html` 和 `posts/first-post.html` 中的导航栏部分，添加或删除导航链接。
+你可以修改 `index.html` 和 `post.html` 中的导航栏部分，添加或删除导航链接。
 
 ## 浏览器兼容性
 
@@ -143,6 +165,16 @@ https://你的GitHub用户名.github.io
 MIT License
 
 ## 更新日志
+
+### v2.0.0 (2025-12-15)
+- 优化了CSS样式，使用CSS变量统一管理
+- 现代化的导航栏设计
+- 优化的英雄区域，带有动画效果
+- 精美的文章卡片设计
+- 支持Markdown格式文章
+- 创建了通用的文章详情页模板
+- 删除了关于页面
+- 优化的响应式设计
 
 ### v1.0.0 (2024-01-01)
 - 初始版本
