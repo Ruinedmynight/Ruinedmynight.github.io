@@ -33,12 +33,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // 页面滚动时导航栏样式变化
     window.addEventListener('scroll', function() {
         const header = document.querySelector('header');
+        const navLinks = header.querySelectorAll('.nav-links a');
+        const logoLink = header.querySelector('.logo a');
+        
         if (window.scrollY > 50) {
+            // 深色背景
             header.style.background = 'rgba(51, 51, 51, 0.95)';
             header.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+            
+            // 白色文字
+            navLinks.forEach(link => {
+                link.style.color = '#ffffff';
+            });
+            logoLink.style.color = '#4CAF50';
         } else {
-            header.style.background = '#333';
-            header.style.boxShadow = 'none';
+            // 浅色背景（恢复CSS默认样式）
+            header.style.background = 'rgba(255, 255, 255, 0.95)';
+            header.style.boxShadow = 'var(--shadow)';
+            
+            // 深色文字（恢复CSS默认样式）
+            navLinks.forEach(link => {
+                link.style.color = 'var(--text-color)';
+            });
+            logoLink.style.color = 'var(--primary-color)';
         }
     });
 
