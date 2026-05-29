@@ -1,191 +1,77 @@
-# 我的博客
+# My Blog — 黑白之间
 
-这是一个使用纯HTML、CSS和JavaScript创建的现代化博客，可以部署到GitHub Pages上。
-
-## 技术栈
-
-- **HTML5** - 页面结构
-- **CSS3** - 样式设计和响应式布局
-- **JavaScript** - 交互功能
-- **marked.js** - Markdown渲染
-- **GitHub Pages** - 部署和托管
-
-## 项目结构
-
-```
-.
-├── css/
-│   └── style.css          # 主样式文件
-├── js/
-│   └── main.js            # JavaScript交互功能
-├── posts/
-│   └── first-post.md      # 示例博客文章 (Markdown格式)
-├── .gitignore             # Git忽略文件
-├── README.md              # 项目说明文档
-├── about.html             # 关于页面 (已移除)
-├── index.html             # 首页
-└── post.html              # 文章详情页模板
-```
+极简风格的个人博客，黑白配色 + 右侧边栏。基于纯 HTML、CSS、JavaScript 构建，文章内容使用 Markdown 编写。
 
 ## 功能特点
 
-- 现代化、精美的设计
-- 响应式布局，适配各种设备
-- 平滑滚动效果
-- 丰富的悬停动画
-- 导航栏滚动变化效果
-- 页面加载动画
-- 支持Markdown格式文章
-- 通用文章详情页模板
-- 带有渐变背景的英雄区域
-- 精美的文章卡片设计
-- 优化的文章阅读体验
-- 现代化的页脚设计
+- 黑白极简设计，右侧固定边栏
+- 文章由 Markdown 文件驱动，无需构建工具
+- 响应式布局，支持移动端
+- 可部署在 GitHub Pages 上
 
-## 本地测试
+## 文章管理
 
-### 方法1：直接在浏览器中打开
+所有文章存放在 `posts/` 目录下，每篇文章是一个 Markdown 文件，元数据写在文件开头的 YAML 头（frontmatter）中：
 
-1. 找到项目目录
-2. 双击 `index.html` 文件
-3. 在浏览器中查看效果
-
-### 方法2：使用本地HTTP服务器
-
-#### 使用Python 3：
-```bash
-python -m http.server 8000
+```
+posts/
+├── posts.json          # 文章列表（只需写文件名，不含扩展名）
+├── your-post.md        # 你的文章（元数据内嵌在文件头部）
+└── another-post.md
 ```
 
-#### 使用Node.js (需要安装http-server)：
-```bash
-npx http-server -p 8000
+### 添加新文章
+
+1. 在 `posts/` 目录下创建 `.md` 文件
+2. 在文件开头添加 YAML 头（frontmatter）：
+
+```markdown
+---
+title: 文章标题
+category: 分类名称
+date: May 30, 2026
+tags: [tag1, tag2]
+excerpt: 文章摘要，会显示在首页卡片上
+---
+
+正文内容从这里开始...
 ```
 
-#### 使用PHP：
-```bash
-php -S localhost:8000
+3. 在 `posts/posts.json` 中添加文件名（不含 `.md` 后缀）：
+
+```json
+"your-post"
 ```
 
-然后在浏览器中访问 `http://localhost:8000`
+## 部署到 GitHub Pages
 
-## 部署到GitHub Pages
+1. 在 GitHub 上创建仓库 `https://github.com/你的用户名/你的用户名.github.io`
 
-### 步骤1：创建GitHub仓库
-
-1. 登录你的GitHub账号
-2. 点击右上角的 "+" 按钮，选择 "New repository"
-3. 仓库名称填写：`你的GitHub用户名.github.io`（例如：`username.github.io`）
-4. 选择公开仓库（Public）
-5. 点击 "Create repository"
-
-### 步骤2：将本地项目推送到GitHub
-
-1. 打开终端或命令提示符
-2. 进入项目目录
-3. 初始化Git仓库：
+2. 推送代码：
    ```bash
    git init
-   ```
-4. 添加所有文件：
-   ```bash
    git add .
-   ```
-5. 提交文件：
-   ```bash
    git commit -m "Initial commit"
-   ```
-6. 关联远程仓库：
-   ```bash
-   git remote add origin https://github.com/你的GitHub用户名/你的GitHub用户名.github.io.git
-   ```
-7. 推送代码到GitHub：
-   ```bash
+   git branch -M main
+   git remote add origin https://github.com/你的用户名/你的用户名.github.io.git
    git push -u origin main
    ```
 
-### 步骤3：启用GitHub Pages
+3. 启用 GitHub Pages：
+   - 进入仓库 **Settings** → **Pages**
+   - 在 "Branch" 下选择 `main`，目录选 `/ (root)`
+   - 点击 **Save**
 
-1. 进入你的GitHub仓库页面
-2. 点击 "Settings" 选项卡
-3. 在左侧菜单中选择 "Pages"
-4. 在 "Source" 部分，选择 "main" 分支，然后选择 "/ (root)"
-5. 点击 "Save"
-6. 等待几分钟，GitHub Pages就会部署你的博客
+4. 你的站点将发布在：`https://你的用户名.github.io`
 
-### 步骤4：访问你的博客
+### 自定义域名（可选）
 
-部署完成后，你可以通过以下网址访问你的博客：
-```
-https://你的GitHub用户名.github.io
-```
+在仓库 **Settings** → **Pages** → **Custom domain** 中配置域名，或在根目录添加 `CNAME` 文件。
 
-## 添加新文章
+## 本地预览
 
-1. 在 `posts/` 目录下创建新的Markdown文件（例如：`new-post.md`）
-2. 按照以下格式编写Markdown内容：
-   ```markdown
-   # 文章标题
-   
-   2024-01-01 | 分类
-   
-   正文内容...
-   ```
-3. 在 `index.html` 中的 `posts` 数组中添加新文章信息：
-   ```javascript
-   const posts = [
-       { slug: 'first-post', filename: 'posts/first-post.md' },
-       { slug: 'new-post', filename: 'posts/new-post.md' }
-   ];
-   ```
+直接用浏览器打开 `index.html` 即可 — 无需任何构建工具。
 
-## 自定义样式
+## License
 
-你可以修改 `css/style.css` 文件来自定义博客的样式，包括：
-- 颜色方案（通过CSS变量）
-- 字体
-- 布局
-- 动画效果
-- 卡片样式
-- 文章详情页样式
-
-## 自定义导航栏
-
-你可以修改 `index.html` 和 `post.html` 中的导航栏部分，添加或删除导航链接。
-
-## 浏览器兼容性
-
-- Chrome (推荐)
-- Firefox
-- Safari
-- Edge
-
-## 许可证
-
-MIT License
-
-## 更新日志
-
-### v2.0.0 (2025-12-15)
-- 优化了CSS样式，使用CSS变量统一管理
-- 现代化的导航栏设计
-- 优化的英雄区域，带有动画效果
-- 精美的文章卡片设计
-- 支持Markdown格式文章
-- 创建了通用的文章详情页模板
-- 删除了关于页面
-- 优化的响应式设计
-
-### v1.0.0 (2024-01-01)
-- 初始版本
-- 完成基本博客功能
-- 实现响应式设计
-- 添加示例文章
-
-## 贡献
-
-欢迎提交Issue和Pull Request！
-
-## 联系方式
-
-如果有任何问题或建议，欢迎通过GitHub Issues与我联系。
+MIT
