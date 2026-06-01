@@ -143,42 +143,29 @@ let postsCache = null;
  * @returns {Array} 文章对象数组 [{ slug, title, category, date, tags, excerpt }]
  */
 async function fetchPosts(force) {
-  // 如果缓存存在且不强制刷新，直接返回缓存结果
   if (postsCache && !force) return postsCache;
 
   try {
-    // 第一步：从 posts.json 获取所有 slug 列表
     const res = await fetch(POSTS_JSON);
-    // 如果请求失败，抛出错误
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    // 解析 JSON 得到 slug 字符串数组
     const slugs = await res.json();
 
-    // 第二步：遍历每个 slug，获取对应的 .md 文件并解析前置元数据
     const posts = [];
     for (const slug of slugs) {
       try {
-        // 请求对应的 Markdown 文件
         const mdRes = await fetch(`posts/${slug}.md`);
-        // 如果文件不存在或请求失败，跳过
         if (!mdRes.ok) continue;
-        // 读取文件文本内容
         const mdText = await mdRes.text();
-        // 解析前置元数据
         const { meta } = parseFrontmatter(mdText);
-        // 将 slug 和元数据合并存入数组
         posts.push({ slug, ...meta });
       } catch (err) {
-        // 单个文件加载失败时只打印警告，不中断整体流程
         console.warn(`Failed to load ${slug}.md:`, err);
       }
     }
 
-    // 存入缓存供后续使用
     postsCache = posts;
     return posts;
   } catch (err) {
-    // 整体加载失败时打印错误并返回空数组
     console.error('Failed to load posts:', err);
     return [];
   }
