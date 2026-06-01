@@ -4,10 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Archive — My Blog</title>
-  <meta name="description" content="All blog posts archived by date.">
+  <title>归档 — 深度睡眠</title>
+  <meta name="description" content="按日期归档的所有博客文章。">
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script>if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
 </head>
 <body>
@@ -15,15 +16,15 @@
   <!-- ===== 顶部固定导航栏 ===== -->
   <header class="site-header">
     <div class="header-inner">
-      <div class="site-title"><a href="index.html">My Blog</a></div>
+      <div class="site-title"><a href="index.html">深度睡眠</a></div>
       <nav>
         <button class="menu-toggle" aria-label="Toggle menu">
           <span></span><span></span><span></span>
         </button>
         <ul class="nav-links">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="archive.html" class="active">Archive</a></li>  <!-- active 高亮当前页 -->
+          <li><a href="index.html">首页</a></li>
+          <li><a href="about.html">关于</a></li>
+          <li><a href="archive.html" class="active">归档</a></li>
         </ul>
       </nav>
     </div>
@@ -33,11 +34,11 @@
   <div class="page-wrap single-column" style="margin-top: 64px;">
 
     <main>
-      <h1 class="page-title">Archive</h1>   <!-- 页面大标题 -->
+      <h1 class="page-title">归档</h1>
 
       <!-- 归档列表容器，由 main.js 的 initArchive() 动态渲染 -->
       <div id="archive-list">
-        <p class="loading-placeholder">Loading...</p>  <!-- 加载中占位 -->
+        <p class="loading-placeholder">加载中...</p>
       </div>
     </main>
 
@@ -45,7 +46,7 @@
 
   <!-- ===== 页脚 ===== -->
   <footer class="site-footer">
-    <p>&copy; 2026 <a href="index.html">My Blog</a>. All rights reserved.</p>
+    <p>&copy; 2026 <a href="index.html">深度睡眠</a>。保留所有权利。</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>

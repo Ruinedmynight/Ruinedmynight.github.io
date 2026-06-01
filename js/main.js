@@ -129,6 +129,28 @@ function parseFrontmatter(mdText) {
 
 
 // ==========================================
+// 日期格式化工具
+// 支持 ISO 格式 (2025-12-01 03:03:36 +0800) 和英文格式 (May 28, 2026)
+// ==========================================
+
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
+    return { display: dateStr, monthYear: dateStr, day: '' };
+  }
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  const day = date.getDate();
+  return {
+    display: `${month} ${day}, ${year}`,
+    monthYear: `${month} ${year}`,
+    day: String(day)
+  };
+}
+
+
+// ==========================================
 // 博客数据引擎
 // ==========================================
 
@@ -157,7 +179,7 @@ async function fetchPosts(force) {
         if (!mdRes.ok) continue;
         const mdText = await mdRes.text();
         const { meta } = parseFrontmatter(mdText);
-        posts.push({ slug, ...meta });
+        posts.push({ slug, ...meta, dateObj: formatDate(meta.date) });
       } catch (err) {
         console.warn(`Failed to load ${slug}.md:`, err);
       }
@@ -207,7 +229,7 @@ async function initIndex() {
   const posts = await fetchPosts();
   // 如果没有文章，显示提示信息
   if (!posts.length) {
-    container.innerHTML = '<p style="color:#888;text-align:center;padding:48px 0;">No posts yet.</p>';
+    container.innerHTML = '<p style="color:#888;text-align:center;padding:48px 0;">暂无文章</p>';
     return;
   }
 
@@ -216,11 +238,11 @@ async function initIndex() {
     <article class="post-card">
       <div class="post-meta">
         <span class="post-category">${post.category}</span>
-        &nbsp;·&nbsp; ${post.date}
+        &nbsp;·&nbsp; ${post.dateObj.display}
       </div>
       <h2><a href="${postUrl(post.slug)}">${post.title}</a></h2>
       <p class="post-excerpt">${post.excerpt}</p>
-      <a href="${postUrl(post.slug)}" class="read-more">Read More</a>
+      <a href="${postUrl(post.slug)}" class="read-more">阅读全文</a>
     </article>
   `).join('');
 }
@@ -260,7 +282,7 @@ async function initSidebar() {
     recentWidget.innerHTML = recent.map(p => `
       <li>
         <div class="recent-title"><a href="${postUrl(p.slug)}">${p.title}</a></div>
-        <div class="recent-date">${p.date}</div>
+        <div class="recent-date">${p.dateObj.display}</div>
       </li>
     `).join('');
   }
@@ -293,7 +315,7 @@ async function initPost() {
   const slug = getSlug();
   // 如果没有指定 slug，显示提示
   if (!slug) {
-    container.innerHTML = '<p style="color:#888">No post specified.</p>';
+    container.innerHTML = '<p style="color:#888">未指定文章</p>';
     return;
   }
 
@@ -310,18 +332,19 @@ async function initPost() {
     const { meta, body } = parseFrontmatter(mdText);
 
     // 更新浏览器标签页标题
-    document.title = `${meta.title || slug} — My Blog`;
+    document.title = `${meta.title || slug} — 深度睡眠`;
     // 更新页面描述（用于 SEO）
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.content = meta.excerpt || '';
 
     // 渲染文章头部（分类、日期、标题）
     const headerEl = document.getElementById('post-header');
+    const fmDate = formatDate(meta.date);
     if (headerEl) {
       headerEl.innerHTML = `
         <div class="post-meta">
           <span class="post-category">${meta.category || ''}</span>
-          &nbsp;·&nbsp; ${meta.date || ''}
+          &nbsp;·&nbsp; ${fmDate.display}
         </div>
         <h1>${meta.title || slug}</h1>
       `;
@@ -329,6 +352,13 @@ async function initPost() {
 
     // 使用 marked 库将 Markdown 正文渲染为 HTML
     container.innerHTML = marked.parse(body);
+
+    // 代码高亮
+    if (typeof hljs !== 'undefined') {
+      container.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+    }
+    // 图片懒加载
+    container.querySelectorAll('img').forEach(img => { img.loading = 'lazy'; });
 
     // 获取完整文章列表，用于渲染上一页/下一页导航
     const posts = await fetchPosts();
@@ -343,17 +373,17 @@ async function initPost() {
     if (navEl) {
       navEl.innerHTML = `
         ${prev ? `<a href="${postUrl(prev.slug)}" class="prev">
-          <span class="nav-label">← Previous</span>${prev.title}
+          <span class="nav-label">← 上一篇</span>${prev.title}
         </a>` : '<div></div>'}
         ${next ? `<a href="${postUrl(next.slug)}" class="next">
-          <span class="nav-label">Next →</span>${next.title}
+          <span class="nav-label">下一篇 →</span>${next.title}
         </a>` : '<div></div>'}
       `;
     }
   } catch (err) {
     // 加载失败时打印错误并显示提示
     console.error('Failed to load post:', err);
-    container.innerHTML = '<p style="color:#888">Post not found.</p>';
+    container.innerHTML = '<p style="color:#888">文章未找到</p>';
   }
 }
 
@@ -372,19 +402,15 @@ async function initArchive() {
   const posts = await fetchPosts();
   // 如果没有文章，显示提示
   if (!posts.length) {
-    container.innerHTML = '<p style="color:#888;text-align:center;padding:48px 0;">No posts yet.</p>';
+    container.innerHTML = '<p style="color:#888;text-align:center;padding:48px 0;">暂无文章</p>';
     return;
   }
 
-  // 按年月分组，例如 "May 2026"
+  // 按年月分组
   const groups = {};
   posts.forEach(p => {
-    // 日期格式为 "May 28, 2026"，取第一个和最后一个单词作为分组键
-    const parts = p.date.split(' ');
-    const key = parts.length >= 2 ? `${parts[0]} ${parts[parts.length - 1]}` : p.date;
-    // 如果该月份分组还不存在，创建一个新数组
+    const key = p.dateObj.monthYear;
     if (!groups[key]) groups[key] = [];
-    // 将文章加入对应月份分组
     groups[key].push(p);
   });
 
@@ -400,7 +426,7 @@ async function initArchive() {
       <ul class="archive-list">
         ${groups[month].map(p => `
           <li class="archive-item">
-            <span class="archive-day">${p.date.replace(/^\w+ \d+/, '').trim()}</span>
+            <span class="archive-day">${p.dateObj.day}</span>
             <a href="${postUrl(p.slug)}">${p.title}</a>
             <span class="archive-category">${p.category}</span>
           </li>

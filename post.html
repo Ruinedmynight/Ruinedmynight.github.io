@@ -4,10 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Post — My Blog</title>                        <!-- 标题会在 JS 加载后被替换为文章标题 -->
-  <meta name="description" content="Blog post">        <!-- 描述会在 JS 加载后被替换为文章摘要 -->
+  <title>文章 — 深度睡眠</title>                        <!-- 标题会在 JS 加载后被替换为文章标题 -->
+  <meta name="description" content="博客文章">        <!-- 描述会在 JS 加载后被替换为文章摘要 -->
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="css/style.css">          <!-- 全局样式 -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
   <script>if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
 </head>
 <body>
@@ -15,15 +17,15 @@
   <!-- ===== 顶部固定导航栏（与首页一致） ===== -->
   <header class="site-header">
     <div class="header-inner">
-      <div class="site-title"><a href="index.html">My Blog</a></div>
+      <div class="site-title"><a href="index.html">深度睡眠</a></div>
       <nav>
         <button class="menu-toggle" aria-label="Toggle menu">
           <span></span><span></span><span></span>
         </button>
         <ul class="nav-links">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="archive.html">Archive</a></li>
+          <li><a href="index.html">首页</a></li>
+          <li><a href="about.html">关于</a></li>
+          <li><a href="archive.html">归档</a></li>
         </ul>
       </nav>
     </div>
@@ -58,9 +60,9 @@
     <!-- ===== 右侧边栏（与首页相同结构） ===== -->
     <aside class="sidebar">
       <div class="sidebar-widget about-widget">
-        <h3>About</h3>
+        <h3>关于</h3>
         <div class="avatar"><span>M</span></div>
-        <p>Writer &amp; developer. I write about code, design, and the quiet things in life.</p>
+        <p>写作者 &amp; 开发者。写代码、设计，和生活里安静的事。</p>
         <div class="social-links">
           <a href="#">GitHub</a>
           <a href="#">Twitter</a>
@@ -70,25 +72,25 @@
 
       <!-- 分类列表，由 main.js 动态渲染 -->
       <div class="sidebar-widget">
-        <h3>Categories</h3>
+        <h3>分类</h3>
         <ul class="category-list" id="sidebar-categories">
-          <li class="loading-placeholder">Loading...</li>
+          <li class="loading-placeholder">加载中...</li>
         </ul>
       </div>
 
       <!-- 最新文章列表，由 main.js 动态渲染 -->
       <div class="sidebar-widget">
-        <h3>Recent Posts</h3>
+        <h3>最新文章</h3>
         <ul class="recent-posts-list" id="sidebar-recent">
-          <li class="loading-placeholder">Loading...</li>
+          <li class="loading-placeholder">加载中...</li>
         </ul>
       </div>
 
       <!-- 标签云，由 main.js 动态渲染 -->
       <div class="sidebar-widget">
-        <h3>Tags</h3>
+        <h3>标签</h3>
         <div class="tag-cloud" id="sidebar-tags">
-          <span class="loading-placeholder">Loading...</span>
+          <span class="loading-placeholder">加载中...</span>
         </div>
       </div>
     </aside>
@@ -97,10 +99,11 @@
 
   <!-- ===== 页脚 ===== -->
   <footer class="site-footer">
-    <p>&copy; 2026 <a href="index.html">My Blog</a>. All rights reserved.</p>
+    <p>&copy; 2026 <a href="index.html">深度睡眠</a>。保留所有权利。</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

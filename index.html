@@ -4,10 +4,11 @@
 <head>
   <meta charset="UTF-8">                               <!-- 字符编码：UTF-8，支持中文 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- 移动端视口设置 -->
-  <title>My Blog — 黑白之间</title>                      <!-- 浏览器标签页标题 -->
-  <meta name="description" content="A minimalist blog with black & white aesthetics.">  <!-- SEO 页面描述 -->
+  <title>深度睡眠</title>                      <!-- 浏览器标签页标题 -->
+  <meta name="description" content="一个极简的黑白风格个人博客。">  <!-- SEO 页面描述 -->
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="css/style.css">          <!-- 引入全局样式表 -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script>if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
 </head>
 <body>
@@ -19,16 +20,16 @@
       <div class="site-title"><a href="index.html">深度睡眠</a></div>
       <nav>
         <!-- 移动端汉堡菜单按钮，点击展开/收起导航 -->
-        <button class="menu-toggle" aria-label="Toggle menu">
+        <button class="menu-toggle" aria-label="切换菜单">
           <span></span>   <!-- 三条横线中的第一条 -->
           <span></span>   <!-- 三条横线中的第二条 -->
           <span></span>   <!-- 三条横线中的第三条 -->
         </button>
         <!-- 主导航链接列表 -->
         <ul class="nav-links">
-          <li><a href="index.html" class="active">Home</a></li>    <!-- 首页，active 高亮 -->
-          <li><a href="about.html">About</a></li>                  <!-- 关于页面 -->
-          <li><a href="archive.html">Archive</a></li>              <!-- 归档页面 -->
+          <li><a href="index.html" class="active">首页</a></li>
+          <li><a href="about.html">关于</a></li>
+          <li><a href="archive.html">归档</a></li>
         </ul>
       </nav>
     </div>
@@ -36,8 +37,8 @@
 
   <!-- ===== Hero 区域：博客标语 ===== -->
   <section class="hero">
-    <h1>Thoughts in Black &amp; White</h1>    <!-- 大标题 -->
-    <p>A quiet place for words, ideas, and stories. Minimal. Simple. Timeless.</p>  <!-- 副标题 -->
+    <h1>黑白之间</h1>
+    <p>一个安静的文字角落。简洁、质朴、历久弥新。</p>
   </section>
 
   <!-- ===== 两栏主布局：左侧文章列表 + 右侧边栏 ===== -->
@@ -53,11 +54,11 @@
 
       <!-- 关于作者 -->
       <div class="sidebar-widget about-widget">
-        <h3>About</h3>                               <!-- 小部件标题 -->
+        <h3>关于</h3>
         <div class="avatar">
           <span>M</span>                              <!-- 头像占位文字 -->
         </div>
-        <p>Writer &amp; developer. I write about code, design, and the quiet things in life. This is my corner of the web.</p>
+        <p>写作者 &amp; 开发者。写代码、设计，和生活里安静的事。这是我在网络上的一隅。</p>
         <div class="social-links">
           <a href="#">GitHub</a>                      <!-- GitHub 链接 -->
           <a href="#">Twitter</a>                     <!-- Twitter 链接 -->
@@ -67,15 +68,15 @@
 
       <!-- 分类列表，由 main.js 动态渲染 -->
       <div class="sidebar-widget">
-        <h3>Categories</h3>
+        <h3>分类</h3>
         <ul class="category-list" id="sidebar-categories">
-          <li class="loading-placeholder">Loading...</li>  <!-- 加载中占位 -->
+          <li class="loading-placeholder">加载中...</li>
         </ul>
       </div>
 
       <!-- 最新文章列表，由 main.js 动态渲染 -->
       <div class="sidebar-widget">
-        <h3>Recent Posts</h3>
+        <h3>最新文章</h3>
         <ul class="recent-posts-list" id="sidebar-recent">
           <li class="loading-placeholder">Loading...</li>
         </ul>
@@ -83,9 +84,9 @@
 
       <!-- 标签云，由 main.js 动态渲染 -->
       <div class="sidebar-widget">
-        <h3>Tags</h3>
+        <h3>标签</h3>
         <div class="tag-cloud" id="sidebar-tags">
-          <span class="loading-placeholder">Loading...</span>
+          <span class="loading-placeholder">加载中...</span>
         </div>
       </div>
 
@@ -95,7 +96,7 @@
 
   <!-- ===== 页脚 ===== -->
   <footer class="site-footer">
-    <p>&copy; 2026 <a href="index.html">深度睡眠</a>. All rights reserved.</p>
+    <p>&copy; 2026 <a href="index.html">深度睡眠</a>。保留所有权利。</p>
   </footer>
 
   <!-- 引入 Markdown 解析库 marked.js（CDN） -->
