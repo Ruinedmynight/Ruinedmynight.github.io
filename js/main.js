@@ -17,7 +17,7 @@
       'width:' + size + 'px;height:' + size + 'px;' +
       'animation-delay:' + (Math.random() * 6) + 's;' +
       'animation-duration:' + (2 + Math.random() * 4) + 's;' +
-      (isAccent ? 'background:rgba(245,158,11,0.6);box-shadow:0 0 4px rgba(245,158,11,0.3);' : '');
+      (isAccent ? 'background:rgba(106,143,160,0.6);box-shadow:0 0 4px rgba(106,143,160,0.3);' : '');
     fragment.appendChild(star);
   }
   sky.appendChild(fragment);
@@ -76,11 +76,11 @@
     var stars = document.querySelectorAll('.star');
     stars.forEach(function (s) {
       if (isLight) {
-        s.style.background = 'rgba(217,119,6,0.25)';
+        s.style.background = 'rgba(82,122,140,0.25)';
         s.style.boxShadow = 'none';
       } else {
-        s.style.background = 'rgba(245,158,11,0.5)';
-        s.style.boxShadow = Math.random() > 0.7 ? '0 0 4px rgba(245,158,11,0.3)' : 'none';
+        s.style.background = 'rgba(106,143,160,0.5)';
+        s.style.boxShadow = Math.random() > 0.7 ? '0 0 4px rgba(106,143,160,0.3)' : 'none';
       }
     });
   }
