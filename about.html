@@ -1,19 +1,20 @@
 <!DOCTYPE html>
-<!-- 关于页面，展示博主信息和博客介绍 -->
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>关于 — 深度睡眠</title>
   <meta name="description" content="关于这个博客和博客作者。">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#0b0d17">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <script>if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+  <script>if(localStorage.getItem('theme')==='light')document.documentElement.setAttribute('data-theme','light');</script>
 </head>
 <body>
 
-  <!-- ===== 顶部固定导航栏 ===== -->
+  <div id="starry-sky" aria-hidden="true"></div>
+
+  <!-- ===== Navigation ===== -->
   <header class="site-header">
     <div class="header-inner">
       <div class="site-title"><a href="index.html">深度睡眠</a></div>
@@ -30,47 +31,40 @@
     </div>
   </header>
 
-  <!-- ===== 单栏布局：页面主体 ===== -->
+  <!-- ===== About Content ===== -->
   <div class="page-wrap single-column about-page">
-
     <main>
       <h1 class="page-title">关于</h1>
 
       <div class="about-content">
-        <!-- 自我介绍 -->
         <p>
           你好，我是 <strong>M</strong>。一个相信简洁力量的写作者兼开发者。
           这个博客是我在代码、设计、文学与生活上的思考记录——一切皆在黑白之间。
         </p>
 
-        <!-- 博客初衷 -->
         <p>
           这个博客始于一个个人项目——互联网上的一处安静角落，没有社交媒体的喧嚣。
           在这里，我探索真正在意的事，记录学到的东西，练习写作这门手艺。
         </p>
 
-        <!-- 个人兴趣 -->
         <p>
           不写作的时候，我在读书、拍黑白照片，或者做开源项目。
           极简主义对我有着持久的吸引力——干净的代码、简洁的设计、诚实的文字。
         </p>
 
-        <!-- 技术说明 -->
         <p>
           这个博客用纯 HTML 和 CSS 构建，部署在 GitHub Pages 上。
           它有意地保持简单——没有框架，没有追踪。只有页面上的文字，本该如此。
         </p>
 
-        <!-- 联系方式 -->
         <p>
           如果你想联系我，可以在 <a href="#">GitHub</a> 或 <a href="#">Twitter</a> 上找到我。
         </p>
       </div>
     </main>
-
   </div>
 
-  <!-- ===== 页脚 ===== -->
+  <!-- ===== Footer ===== -->
   <footer class="site-footer">
     <p>&copy; 2026 <a href="index.html">深度睡眠</a>。保留所有权利。</p>
   </footer>

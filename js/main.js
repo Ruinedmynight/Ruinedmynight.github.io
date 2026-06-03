@@ -1,187 +1,188 @@
 // ==========================================
-// 移动端菜单切换功能
+// Star Particle System
 // ==========================================
 
-// 定义并立即执行一个函数，用于初始化移动端菜单
+(function initStars() {
+  var sky = document.getElementById('starry-sky');
+  if (!sky) return;
+  var fragment = document.createDocumentFragment();
+  for (var i = 0; i < 80; i++) {
+    var star = document.createElement('div');
+    star.className = 'star';
+    var size = 1 + Math.random() * 2.5;
+    var isAccent = Math.random() > 0.7;
+    star.style.cssText =
+      'left:' + (Math.random() * 100) + '%;' +
+      'top:' + (Math.random() * 100) + '%;' +
+      'width:' + size + 'px;height:' + size + 'px;' +
+      'animation-delay:' + (Math.random() * 6) + 's;' +
+      'animation-duration:' + (2 + Math.random() * 4) + 's;' +
+      (isAccent ? 'background:rgba(245,158,11,0.6);box-shadow:0 0 4px rgba(245,158,11,0.3);' : '');
+    fragment.appendChild(star);
+  }
+  sky.appendChild(fragment);
+})();
+
+
+// ==========================================
+// Mobile Menu Toggle
+// ==========================================
+
 (function initMenu() {
-  // 获取汉堡菜单按钮元素
-  const toggle = document.querySelector('.menu-toggle');
-  // 获取导航链接列表元素
-  const nav = document.querySelector('.nav-links');
-  // 如果按钮或导航不存在，直接退出
+  var toggle = document.querySelector('.menu-toggle');
+  var nav = document.querySelector('.nav-links');
   if (!toggle || !nav) return;
 
-  // 点击汉堡按钮时，切换导航菜单的显示状态
-  toggle.addEventListener('click', () => {
+  toggle.addEventListener('click', function () {
     nav.classList.toggle('open');
     toggle.classList.toggle('active');
   });
 
-  // 遍历导航中的所有链接
-  nav.querySelectorAll('a').forEach(link => {
-    // 点击链接后自动关闭菜单
-    link.addEventListener('click', () => {
+  nav.querySelectorAll('a').forEach(function (link) {
+    link.addEventListener('click', function () {
       nav.classList.remove('open');
       toggle.classList.remove('active');
     });
   });
 
-  // 点击页面任意位置时
-  document.addEventListener('click', (e) => {
-    // 如果点击不在header区域内，则关闭菜单
+  document.addEventListener('click', function (e) {
     if (!e.target.closest('.header-inner')) {
       nav.classList.remove('open');
       toggle.classList.remove('active');
-    }
-  });
-})(); // 立即执行此函数
-
-
-// ==========================================
-// 暗黑模式切换
-// ==========================================
-
-(function initDarkMode() {
-  var html = document.documentElement;
-  var stored = localStorage.getItem('theme');
-
-  // 应用已保存的主题
-  if (stored === 'dark') {
-    html.setAttribute('data-theme', 'dark');
-  }
-
-  // 创建切换按钮
-  var toggle = document.createElement('button');
-  toggle.className = 'theme-toggle';
-  toggle.setAttribute('aria-label', '切换暗黑模式');
-  toggle.innerHTML = stored === 'dark' ? '☀' : '☾';
-
-  // 插入到导航栏
-  var headerInner = document.querySelector('.header-inner');
-  if (headerInner) {
-    headerInner.appendChild(toggle);
-  }
-
-  // 点击切换
-  toggle.addEventListener('click', function () {
-    var isDark = html.getAttribute('data-theme') === 'dark';
-    if (isDark) {
-      html.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
-      toggle.innerHTML = '☾';
-    } else {
-      html.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-      toggle.innerHTML = '☀';
     }
   });
 })();
 
 
 // ==========================================
-// YAML 前置元数据解析器
-// 从 Markdown 文件头部提取标题、分类、日期等信息
+// Dark / Light Mode Toggle
 // ==========================================
 
-/**
- * 解析 Markdown 文本中的 YAML 前置元数据
- * @param {string} mdText - 完整的 Markdown 文件内容
- * @returns {object} { meta: {title, category, date, tags, excerpt}, body: 正文内容 }
- */
+(function initThemeToggle() {
+  var html = document.documentElement;
+  var stored = localStorage.getItem('theme');
+
+  if (stored === 'light') {
+    html.setAttribute('data-theme', 'light');
+  }
+
+  var toggle = document.createElement('button');
+  toggle.className = 'theme-toggle';
+  toggle.setAttribute('aria-label', '切换主题');
+  toggle.textContent = stored === 'light' ? '暗' : '明';
+
+  // Update star colors when theme changes
+  function updateStars(isLight) {
+    var stars = document.querySelectorAll('.star');
+    stars.forEach(function (s) {
+      if (isLight) {
+        s.style.background = 'rgba(217,119,6,0.25)';
+        s.style.boxShadow = 'none';
+      } else {
+        s.style.background = 'rgba(245,158,11,0.5)';
+        s.style.boxShadow = Math.random() > 0.7 ? '0 0 4px rgba(245,158,11,0.3)' : 'none';
+      }
+    });
+  }
+
+  var headerInner = document.querySelector('.header-inner');
+  if (headerInner) {
+    headerInner.appendChild(toggle);
+  }
+
+  toggle.addEventListener('click', function () {
+    var isDark = html.getAttribute('data-theme') !== 'light';
+    if (isDark) {
+      html.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+      toggle.textContent = '暗';
+      updateStars(true);
+    } else {
+      html.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'dark');
+      toggle.textContent = '明';
+      updateStars(false);
+    }
+  });
+})();
+
+
+// ==========================================
+// YAML Frontmatter Parser
+// ==========================================
+
 function parseFrontmatter(mdText) {
-  // 定义元数据的默认值结构
-  const meta = { title: '', category: '', date: '', tags: [], excerpt: '' };
-  // 使用正则匹配位于文件开头的 --- 包裹的 YAML 内容
-  const match = mdText.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
-  // 如果没有找到前置元数据，直接返回默认值和完整文本作为正文
-  if (!match) return { meta, body: mdText };
+  var meta = { title: '', category: '', date: '', tags: [], excerpt: '' };
+  var match = mdText.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
+  if (!match) return { meta: meta, body: mdText };
 
-  // match[1] 是 YAML 部分的纯文本内容
-  const yaml = match[1];
-  // match[0] 是整个 --- 包裹区域，剩下的就是正文
-  const body = mdText.slice(match[0].length);
+  var yaml = match[1];
+  var body = mdText.slice(match[0].length);
 
-  // 按换行符分割 YAML 的每一行
-  yaml.split('\n').forEach(line => {
-    // 查找 ": " 分隔符的位置
-    const sep = line.indexOf(': ');
-    // 如果没有分隔符则跳过该行
+  yaml.split('\n').forEach(function (line) {
+    var sep = line.indexOf(': ');
     if (sep === -1) return;
-    // 冒号前是键名
-    const key = line.slice(0, sep).trim();
-    // 冒号后是值
-    let val = line.slice(sep + 2).trim();
+    var key = line.slice(0, sep).trim();
+    var val = line.slice(sep + 2).trim();
 
-    // 如果是 tags 字段，需要特殊处理数组格式
     if (key === 'tags') {
-      // 去掉方括号，按逗号分割，去除空白，过滤空字符串
-      val = val.replace(/^\[|\]$/g, '').split(',').map(t => t.trim()).filter(Boolean);
+      val = val.replace(/^\[|\]$/g, '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
       meta.tags = val;
     } else if (key === 'title' || key === 'category' || key === 'date' || key === 'excerpt') {
-      // 其他字段直接赋值
       meta[key] = val;
     }
   });
 
-  // 返回解析出的元数据和正文
-  return { meta, body };
+  return { meta: meta, body: body };
 }
 
 
 // ==========================================
-// 日期格式化工具
-// 支持 ISO 格式 (2025-12-01 03:03:36 +0800) 和英文格式 (May 28, 2026)
+// Date Formatting
 // ==========================================
 
 function formatDate(dateStr) {
-  const date = new Date(dateStr);
+  var date = new Date(dateStr);
   if (isNaN(date.getTime())) {
     return { display: dateStr, monthYear: dateStr, day: '' };
   }
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-  const day = date.getDate();
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var month = months[date.getMonth()];
+  var year = date.getFullYear();
+  var day = date.getDate();
   return {
-    display: `${month} ${day}, ${year}`,
-    monthYear: `${month} ${year}`,
+    display: month + ' ' + day + ', ' + year,
+    monthYear: month + ' ' + year,
     day: String(day)
   };
 }
 
 
 // ==========================================
-// 博客数据引擎
+// Blog Data Engine
 // ==========================================
 
-// posts.json 的文件路径（仅存储 slug 列表）
-const POSTS_JSON = 'posts/posts.json';
-// 缓存文章列表，避免重复请求
-let postsCache = null;
+var POSTS_JSON = 'posts/posts.json';
+var postsCache = null;
 
-/**
- * 获取所有文章的元数据列表
- * @param {boolean} force - 是否强制刷新缓存
- * @returns {Array} 文章对象数组 [{ slug, title, category, date, tags, excerpt }]
- */
 async function fetchPosts(force) {
   if (postsCache && !force) return postsCache;
 
   try {
-    const res = await fetch(POSTS_JSON);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const slugs = await res.json();
+    var res = await fetch(POSTS_JSON);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var slugs = await res.json();
 
-    const posts = [];
-    for (const slug of slugs) {
+    var posts = [];
+    for (var i = 0; i < slugs.length; i++) {
       try {
-        const mdRes = await fetch(`posts/${slug}.md`);
+        var mdRes = await fetch('posts/' + slugs[i] + '.md');
         if (!mdRes.ok) continue;
-        const mdText = await mdRes.text();
-        const { meta } = parseFrontmatter(mdText);
-        posts.push({ slug, ...meta, dateObj: formatDate(meta.date) });
+        var mdText = await mdRes.text();
+        var parsed = parseFrontmatter(mdText);
+        posts.push({ slug: slugs[i], dateObj: formatDate(parsed.meta.date), ...parsed.meta });
       } catch (err) {
-        console.warn(`Failed to load ${slug}.md:`, err);
+        console.warn('Failed to load ' + slugs[i] + '.md:', err);
       }
     }
 
@@ -193,252 +194,204 @@ async function fetchPosts(force) {
   }
 }
 
-/**
- * 从 URL 查询参数中获取当前文章的 slug
- * @returns {string|null} slug 值
- */
 function getSlug() {
-  // 解析浏览器 URL 中的查询参数
-  const params = new URLSearchParams(window.location.search);
-  // 返回 slug 参数的值
+  var params = new URLSearchParams(window.location.search);
   return params.get('slug');
 }
 
-/**
- * 生成文章的链接 URL
- * @param {string} slug - 文章标识
- * @returns {string} 完整的文章页 URL
- */
 function postUrl(slug) {
-  // 将 slug 编码后拼接到 post.html 的查询参数中
-  return `post.html?slug=${encodeURIComponent(slug)}`;
+  return 'post.html?slug=' + encodeURIComponent(slug);
 }
 
 
 // ==========================================
-// 首页：渲染文章列表
+// Index Page: Render Post List
 // ==========================================
 
 async function initIndex() {
-  // 获取文章列表容器元素
-  const container = document.getElementById('post-list');
-  // 如果当前页面没有此元素（非首页），直接返回
+  var container = document.getElementById('post-list');
   if (!container) return;
 
-  // 获取所有文章数据
-  const posts = await fetchPosts();
-  // 如果没有文章，显示提示信息
+  var posts = await fetchPosts();
   if (!posts.length) {
-    container.innerHTML = '<p style="color:#888;text-align:center;padding:48px 0;">暂无文章</p>';
+    container.innerHTML = '<p style="color:var(--color-text-muted);text-align:center;padding:48px 0;">暂无文章</p>';
     return;
   }
 
-  // 将文章数组渲染为 HTML 卡片列表
-  container.innerHTML = posts.map(post => `
-    <article class="post-card">
-      <div class="post-meta">
-        <span class="post-category">${post.category}</span>
-        &nbsp;·&nbsp; ${post.dateObj.display}
-      </div>
-      <h2><a href="${postUrl(post.slug)}">${post.title}</a></h2>
-      <p class="post-excerpt">${post.excerpt}</p>
-      <a href="${postUrl(post.slug)}" class="read-more">阅读全文</a>
-    </article>
-  `).join('');
+  container.innerHTML = posts.map(function (post) {
+    return '<article class="post-card">' +
+      '<div class="post-meta">' +
+        '<span class="post-category">' + post.category + '</span>' +
+        '<span style="color:var(--color-text-muted)">' + post.dateObj.display + '</span>' +
+      '</div>' +
+      '<h2><a href="' + postUrl(post.slug) + '">' + post.title + '</a></h2>' +
+      '<p class="post-excerpt">' + post.excerpt + '</p>' +
+      '<a href="' + postUrl(post.slug) + '" class="read-more">阅读全文</a>' +
+    '</article>';
+  }).join('');
 }
 
 
 // ==========================================
-// 侧边栏：渲染分类、最新文章、标签
+// Sidebar: Categories, Recent Posts, Tags
 // ==========================================
 
 async function initSidebar() {
-  // 获取侧边栏容器
-  const sidebar = document.querySelector('.sidebar');
-  // 如果当前页面没有侧边栏，直接返回
+  var sidebar = document.querySelector('.sidebar');
   if (!sidebar) return;
 
-  // 获取所有文章数据
-  const posts = await fetchPosts();
-  // 没有文章则无需渲染侧边栏
+  var posts = await fetchPosts();
   if (!posts.length) return;
 
-  // ---- 分类列表 ----
-  const catWidget = sidebar.querySelector('#sidebar-categories');
+  // Categories
+  var catWidget = sidebar.querySelector('#sidebar-categories');
   if (catWidget) {
-    // 统计每个分类的文章数量
-    const catMap = {};
-    posts.forEach(p => { catMap[p.category] = (catMap[p.category] || 0) + 1; });
-    // 渲染分类列表（分类名 + 文章数量）
-    catWidget.innerHTML = Object.entries(catMap).map(([cat, count]) => `
-      <li><a href="#">${cat}</a><span class="count">${count}</span></li>
-    `).join('');
+    var catMap = {};
+    posts.forEach(function (p) { catMap[p.category] = (catMap[p.category] || 0) + 1; });
+    catWidget.innerHTML = Object.entries(catMap).map(function (pair) {
+      return '<li><a href="#">' + pair[0] + '</a><span class="count">' + pair[1] + '</span></li>';
+    }).join('');
   }
 
-  // ---- 最新文章（取前 5 篇）----
-  const recentWidget = sidebar.querySelector('#sidebar-recent');
+  // Recent posts
+  var recentWidget = sidebar.querySelector('#sidebar-recent');
   if (recentWidget) {
-    const recent = [...posts].slice(0, 5);
-    recentWidget.innerHTML = recent.map(p => `
-      <li>
-        <div class="recent-title"><a href="${postUrl(p.slug)}">${p.title}</a></div>
-        <div class="recent-date">${p.dateObj.display}</div>
-      </li>
-    `).join('');
+    var recent = posts.slice(0, 5);
+    recentWidget.innerHTML = recent.map(function (p) {
+      return '<li>' +
+        '<div class="recent-title"><a href="' + postUrl(p.slug) + '">' + p.title + '</a></div>' +
+        '<div class="recent-date">' + p.dateObj.display + '</div>' +
+      '</li>';
+    }).join('');
   }
 
-  // ---- 标签云（去重后的所有标签）----
-  const tagsWidget = sidebar.querySelector('#sidebar-tags');
+  // Tags
+  var tagsWidget = sidebar.querySelector('#sidebar-tags');
   if (tagsWidget) {
-    // 使用 Set 结构自动去重
-    const tagSet = new Set();
-    posts.forEach(p => p.tags.forEach(t => tagSet.add(t)));
-    // 渲染标签链接
-    tagsWidget.innerHTML = Array.from(tagSet).map(tag => `
-      <a href="#">${tag}</a>
-    `).join('');
+    var tagSet = new Set();
+    posts.forEach(function (p) { p.tags.forEach(function (t) { tagSet.add(t); }); });
+    tagsWidget.innerHTML = Array.from(tagSet).map(function (tag) {
+      return '<a href="#">' + tag + '</a>';
+    }).join('');
   }
 }
 
 
 // ==========================================
-// 文章页：根据 slug 加载 Markdown 内容
+// Post Page: Load and Render Markdown
 // ==========================================
 
 async function initPost() {
-  // 获取文章内容容器
-  const container = document.getElementById('post-content');
-  // 如果当前页面不是文章页，直接返回
+  var container = document.getElementById('post-content');
   if (!container) return;
 
-  // 从 URL 中获取当前文章的 slug
-  const slug = getSlug();
-  // 如果没有指定 slug，显示提示
+  var slug = getSlug();
   if (!slug) {
-    container.innerHTML = '<p style="color:#888">未指定文章</p>';
+    container.innerHTML = '<p style="color:var(--color-text-muted)">未指定文章</p>';
     return;
   }
 
-  // 加载并解析 Markdown 文件
   try {
-    // 请求对应的 .md 文件
-    const mdRes = await fetch(`posts/${slug}.md`);
-    // 请求失败则抛出错误
-    if (!mdRes.ok) throw new Error(`HTTP ${mdRes.status}`);
-    // 读取文件内容
-    const mdText = await mdRes.text();
+    var mdRes = await fetch('posts/' + slug + '.md');
+    if (!mdRes.ok) throw new Error('HTTP ' + mdRes.status);
+    var mdText = await mdRes.text();
 
-    // 解析前置元数据和正文
-    const { meta, body } = parseFrontmatter(mdText);
+    var parsed = parseFrontmatter(mdText);
+    var meta = parsed.meta;
+    var body = parsed.body;
 
-    // 更新浏览器标签页标题
-    document.title = `${meta.title || slug} — 深度睡眠`;
-    // 更新页面描述（用于 SEO）
-    const metaDesc = document.querySelector('meta[name="description"]');
+    document.title = (meta.title || slug) + ' — 深度睡眠';
+    var metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.content = meta.excerpt || '';
 
-    // 渲染文章头部（分类、日期、标题）
-    const headerEl = document.getElementById('post-header');
-    const fmDate = formatDate(meta.date);
+    var headerEl = document.getElementById('post-header');
+    var fmDate = formatDate(meta.date);
     if (headerEl) {
-      headerEl.innerHTML = `
-        <div class="post-meta">
-          <span class="post-category">${meta.category || ''}</span>
-          &nbsp;·&nbsp; ${fmDate.display}
-        </div>
-        <h1>${meta.title || slug}</h1>
-      `;
+      headerEl.innerHTML =
+        '<div class="post-meta">' +
+          '<span class="post-category">' + (meta.category || '') + '</span>' +
+          '<span style="color:var(--color-text-muted)">' + ' · ' + fmDate.display + '</span>' +
+        '</div>' +
+        '<h1>' + (meta.title || slug) + '</h1>';
     }
 
-    // 使用 marked 库将 Markdown 正文渲染为 HTML
     container.innerHTML = marked.parse(body);
 
-    // 代码高亮
     if (typeof hljs !== 'undefined') {
-      container.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+      container.querySelectorAll('pre code').forEach(function (block) { hljs.highlightElement(block); });
     }
-    // 图片懒加载
-    container.querySelectorAll('img').forEach(img => { img.loading = 'lazy'; });
+    container.querySelectorAll('img').forEach(function (img) { img.loading = 'lazy'; });
 
-    // 获取完整文章列表，用于渲染上一页/下一页导航
-    const posts = await fetchPosts();
-    // 查找当前文章在列表中的索引位置
-    const idx = posts.findIndex(p => p.slug === slug);
-    // 获取上一篇（索引减一）
-    const prev = idx > 0 ? posts[idx - 1] : null;
-    // 获取下一篇（索引加一）
-    const next = idx < posts.length - 1 && idx !== -1 ? posts[idx + 1] : null;
-    // 渲染上/下篇文章导航
-    const navEl = document.getElementById('post-nav');
+    var posts = await fetchPosts();
+    var idx = posts.findIndex(function (p) { return p.slug === slug; });
+    var prev = idx > 0 ? posts[idx - 1] : null;
+    var next = (idx < posts.length - 1 && idx !== -1) ? posts[idx + 1] : null;
+
+    var navEl = document.getElementById('post-nav');
     if (navEl) {
-      navEl.innerHTML = `
-        ${prev ? `<a href="${postUrl(prev.slug)}" class="prev">
-          <span class="nav-label">← 上一篇</span>${prev.title}
-        </a>` : '<div></div>'}
-        ${next ? `<a href="${postUrl(next.slug)}" class="next">
-          <span class="nav-label">下一篇 →</span>${next.title}
-        </a>` : '<div></div>'}
-      `;
+      navEl.innerHTML =
+        (prev
+          ? '<a href="' + postUrl(prev.slug) + '" class="prev">' +
+            '<span class="nav-label">\u2190 上一篇</span>' + prev.title +
+          '</a>'
+          : '<div></div>') +
+        (next
+          ? '<a href="' + postUrl(next.slug) + '" class="next">' +
+            '<span class="nav-label">下一篇 \u2192</span>' + next.title +
+          '</a>'
+          : '<div></div>');
     }
   } catch (err) {
-    // 加载失败时打印错误并显示提示
     console.error('Failed to load post:', err);
-    container.innerHTML = '<p style="color:#888">文章未找到</p>';
+    container.innerHTML = '<p style="color:var(--color-text-muted)">文章未找到</p>';
   }
 }
 
 
 // ==========================================
-// 归档页：按月份分组展示所有文章
+// Archive Page: Group Posts by Month
 // ==========================================
 
 async function initArchive() {
-  // 获取归档列表容器
-  const container = document.getElementById('archive-list');
-  // 如果当前页面不是归档页，直接返回
+  var container = document.getElementById('archive-list');
   if (!container) return;
 
-  // 获取所有文章数据
-  const posts = await fetchPosts();
-  // 如果没有文章，显示提示
+  var posts = await fetchPosts();
   if (!posts.length) {
-    container.innerHTML = '<p style="color:#888;text-align:center;padding:48px 0;">暂无文章</p>';
+    container.innerHTML = '<p style="color:var(--color-text-muted);text-align:center;padding:48px 0;">暂无文章</p>';
     return;
   }
 
-  // 按年月分组
-  const groups = {};
-  posts.forEach(p => {
-    const key = p.dateObj.monthYear;
+  var groups = {};
+  posts.forEach(function (p) {
+    var key = p.dateObj.monthYear;
     if (!groups[key]) groups[key] = [];
     groups[key].push(p);
   });
 
-  // 将月份按时间倒序排列（最新的在前）
-  const sortedMonths = Object.keys(groups).sort((a, b) => {
+  var sortedMonths = Object.keys(groups).sort(function (a, b) {
     return new Date(b) - new Date(a);
   });
 
-  // 渲染归档列表
-  container.innerHTML = sortedMonths.map(month => `
-    <div class="archive-month">
-      <h2 class="archive-month-title">${month}</h2>
-      <ul class="archive-list">
-        ${groups[month].map(p => `
-          <li class="archive-item">
-            <span class="archive-day">${p.dateObj.day}</span>
-            <a href="${postUrl(p.slug)}">${p.title}</a>
-            <span class="archive-category">${p.category}</span>
-          </li>
-        `).join('')}
-      </ul>
-    </div>
-  `).join('');
+  container.innerHTML = sortedMonths.map(function (month) {
+    return '<div class="archive-month">' +
+      '<h2 class="archive-month-title">' + month + '</h2>' +
+      '<ul class="archive-list">' +
+        groups[month].map(function (p) {
+          return '<li class="archive-item">' +
+            '<span class="archive-day">' + p.dateObj.day + '</span>' +
+            '<a href="' + postUrl(p.slug) + '">' + p.title + '</a>' +
+            '<span class="archive-category">' + p.category + '</span>' +
+          '</li>';
+        }).join('') +
+      '</ul>' +
+    '</div>';
+  }).join('');
 }
 
 
 // ==========================================
-// 滚动效果：header 阴影 + 阅读进度条
+// Scroll Effects: Header Shadow + Progress
 // ==========================================
 
 (function initScrollEffects() {
@@ -451,12 +404,10 @@ async function initArchive() {
       requestAnimationFrame(function () {
         var scrollY = window.scrollY;
 
-        // Header shadow
         if (header) {
           header.classList.toggle('scrolled', scrollY > 10);
         }
 
-        // Reading progress bar
         if (progressBar) {
           var docHeight = document.documentElement.scrollHeight - window.innerHeight;
           var progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
@@ -472,24 +423,20 @@ async function initArchive() {
 
 
 // ==========================================
-// 页面初始化入口
+// Page Initialization
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', () => {
-  // 所有页面都尝试初始化侧边栏
+document.addEventListener('DOMContentLoaded', function () {
   initSidebar();
 
-  // 如果页面有 id="post-list" 元素，说明是首页，初始化文章列表
   if (document.getElementById('post-list')) {
     initIndex();
   }
 
-  // 如果页面有 id="post-content" 元素，说明是文章页，加载文章内容
   if (document.getElementById('post-content')) {
     initPost();
   }
 
-  // 如果页面有 id="archive-list" 元素，说明是归档页，渲染归档
   if (document.getElementById('archive-list')) {
     initArchive();
   }

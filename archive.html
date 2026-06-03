@@ -1,19 +1,20 @@
 <!DOCTYPE html>
-<!-- 归档页面：按月份分组展示所有文章 -->
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>归档 — 深度睡眠</title>
   <meta name="description" content="按日期归档的所有博客文章。">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#0b0d17">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <script>if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+  <script>if(localStorage.getItem('theme')==='light')document.documentElement.setAttribute('data-theme','light');</script>
 </head>
 <body>
 
-  <!-- ===== 顶部固定导航栏 ===== -->
+  <div id="starry-sky" aria-hidden="true"></div>
+
+  <!-- ===== Navigation ===== -->
   <header class="site-header">
     <div class="header-inner">
       <div class="site-title"><a href="index.html">深度睡眠</a></div>
@@ -30,21 +31,18 @@
     </div>
   </header>
 
-  <!-- ===== 单栏布局 ===== -->
-  <div class="page-wrap single-column" style="margin-top: 64px;">
-
+  <!-- ===== Archive Content ===== -->
+  <div class="page-wrap single-column about-page">
     <main>
       <h1 class="page-title">归档</h1>
 
-      <!-- 归档列表容器，由 main.js 的 initArchive() 动态渲染 -->
       <div id="archive-list">
         <p class="loading-placeholder">加载中...</p>
       </div>
     </main>
-
   </div>
 
-  <!-- ===== 页脚 ===== -->
+  <!-- ===== Footer ===== -->
   <footer class="site-footer">
     <p>&copy; 2026 <a href="index.html">深度睡眠</a>。保留所有权利。</p>
   </footer>
