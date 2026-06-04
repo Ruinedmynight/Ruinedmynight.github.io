@@ -112,7 +112,7 @@
 // ==========================================
 
 function parseFrontmatter(mdText) {
-  var meta = { title: '', category: '', date: '', tags: [], excerpt: '' };
+  var meta = { title: '', categories: [], date: '', tags: [], excerpt: '' };
   var match = mdText.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
   if (!match) return { meta: meta, body: mdText };
 
@@ -130,7 +130,7 @@ function parseFrontmatter(mdText) {
       meta.tags = val;
     } else if (key === 'categories') {
       var cats = val.replace(/^\[|\]$/g, '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
-      meta.category = cats[0] || '';
+      meta.categories = cats.length ? cats : [''];
     } else if (key === 'title' || key === 'category' || key === 'date' || key === 'excerpt') {
       meta[key] = val;
     }
@@ -224,7 +224,7 @@ async function initIndex() {
   container.innerHTML = posts.map(function (post) {
     return '<article class="post-card">' +
       '<div class="post-meta">' +
-        '<span class="post-category">' + post.category + '</span>' +
+        '<span class="post-category">' + post.categories.join(', ') + '</span>' +
         '<span style="color:var(--color-text-muted)">' + post.dateObj.display + '</span>' +
       '</div>' +
       '<h2><a href="' + postUrl(post.slug) + '">' + post.title + '</a></h2>' +
@@ -250,7 +250,11 @@ async function initSidebar() {
   var catWidget = sidebar.querySelector('#sidebar-categories');
   if (catWidget) {
     var catMap = {};
-    posts.forEach(function (p) { catMap[p.category] = (catMap[p.category] || 0) + 1; });
+    posts.forEach(function (p) {
+      p.categories.forEach(function (cat) {
+        catMap[cat] = (catMap[cat] || 0) + 1;
+      });
+    });
     catWidget.innerHTML = Object.entries(catMap).map(function (pair) {
       return '<li><a href="#">' + pair[0] + '</a><span class="count">' + pair[1] + '</span></li>';
     }).join('');
@@ -312,7 +316,7 @@ async function initPost() {
     if (headerEl) {
       headerEl.innerHTML =
         '<div class="post-meta">' +
-          '<span class="post-category">' + (meta.category || '') + '</span>' +
+          '<span class="post-category">' + (meta.categories ? meta.categories.join(', ') : '') + '</span>' +
           '<span style="color:var(--color-text-muted)">' + ' · ' + fmDate.display + '</span>' +
         '</div>' +
         '<h1>' + (meta.title || slug) + '</h1>';
@@ -384,7 +388,7 @@ async function initArchive() {
           return '<li class="archive-item">' +
             '<span class="archive-day">' + p.dateObj.day + '</span>' +
             '<a href="' + postUrl(p.slug) + '">' + p.title + '</a>' +
-            '<span class="archive-category">' + p.category + '</span>' +
+            '<span class="archive-category">' + p.categories.join(', ') + '</span>' +
           '</li>';
         }).join('') +
       '</ul>' +
