@@ -4,6 +4,7 @@ author: d2epsl2ep
 date: 2025-11-30 12:00:00 +0800
 categories: [博客, 教程]
 tags: [电源计划]
+excerpt: Windows 10和Windows 11系统中存在隐藏的高性能模式，可以通过PowerShell命令开启。本文将详细介绍如何启用这些模式，以及遇到常见问题时的解决方案。
 ---
 
 > **注意：家庭版系统不支持此功能**

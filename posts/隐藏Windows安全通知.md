@@ -4,6 +4,7 @@ date: 2025-11-30 12:00:00 +0800
 author: d2epsl2ep
 categories: [博客, 教程]
 tags: [Windows, 安全]
+excerpt: "在日常使用Windows系统时，Windows安全中心和Windows Defender经常会弹出各种通知，比如“Windows防火墙已关闭”等提醒。虽然这些通知是为了系统安全考虑，但有时可能会显得过于频繁或干扰工作。本文将介绍两种方法来隐藏这些通知，让你的工作环境更加安静。"
 ---
 
 在日常使用Windows系统时，Windows安全中心和Windows Defender经常会弹出各种通知，比如"Windows防火墙已关闭"等提醒。虽然这些通知是为了系统安全考虑，但有时可能会显得过于频繁或干扰工作。本文将介绍两种方法来隐藏这些通知，让你的工作环境更加安静。

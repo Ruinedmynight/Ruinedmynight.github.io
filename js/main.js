@@ -128,6 +128,9 @@ function parseFrontmatter(mdText) {
     if (key === 'tags') {
       val = val.replace(/^\[|\]$/g, '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
       meta.tags = val;
+    } else if (key === 'categories') {
+      var cats = val.replace(/^\[|\]$/g, '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+      meta.category = cats[0] || '';
     } else if (key === 'title' || key === 'category' || key === 'date' || key === 'excerpt') {
       meta[key] = val;
     }
