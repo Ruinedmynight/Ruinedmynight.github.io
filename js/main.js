@@ -108,6 +108,105 @@
 
 
 // ==========================================
+// Search Overlay
+// ==========================================
+
+(function initSearch() {
+  var toggle = document.querySelector('.search-toggle');
+  if (!toggle) return;
+
+  // Build overlay
+  var overlay = document.createElement('div');
+  overlay.className = 'search-overlay';
+  overlay.innerHTML =
+    '<div class="search-overlay-inner">' +
+      '<input type="text" class="search-input" placeholder="搜索文章..." autofocus>' +
+      '<ul class="search-results"></ul>' +
+    '</div>' +
+    '<button class="search-close" aria-label="关闭搜索">\u2715</button>';
+  document.body.appendChild(overlay);
+
+  var input = overlay.querySelector('.search-input');
+  var results = overlay.querySelector('.search-results');
+  var close = overlay.querySelector('.search-close');
+
+  function open() {
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(function () { input.focus(); }, 100);
+  }
+
+  function closeSearch() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    input.value = '';
+    results.innerHTML = '';
+  }
+
+  toggle.addEventListener('click', open);
+  close.addEventListener('click', closeSearch);
+
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeSearch();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeSearch();
+    if (e.key === '/' && !overlay.classList.contains('open') && !e.target.matches('input, textarea')) {
+      e.preventDefault();
+      open();
+    }
+  });
+
+  // Debounced search
+  var debounceTimer;
+  input.addEventListener('input', function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(performSearch, 200);
+  });
+
+  function performSearch() {
+    var query = input.value.trim().toLowerCase();
+    if (!query) {
+      results.innerHTML = '';
+      return;
+    }
+
+    // Get posts from cache
+    if (typeof postsCache === 'undefined' || !postsCache) {
+      results.innerHTML = '<li class="no-results">加载文章中...</li>';
+      return;
+    }
+
+    var filtered = postsCache.filter(function (post) {
+      return (post.title && post.title.toLowerCase().indexOf(query) !== -1) ||
+             (post.categories && post.categories.some(function (c) { return c.toLowerCase().indexOf(query) !== -1; })) ||
+             (post.tags && post.tags.some(function (t) { return t.toLowerCase().indexOf(query) !== -1; })) ||
+             (post.excerpt && post.excerpt.toLowerCase().indexOf(query) !== -1);
+    }).slice(0, 20);
+
+    if (!filtered.length) {
+      results.innerHTML = '<li class="no-results">未找到匹配的文章</li>';
+      return;
+    }
+
+    results.innerHTML = filtered.map(function (post) {
+      var catHtml = post.categories && post.categories.length
+        ? '<span class="result-category">' + post.categories.join(', ') + '</span>'
+        : '';
+      return '<li class="search-result-item">' +
+        '<a href="' + postUrl(post.slug) + '">' + post.title + '</a>' +
+        '<div class="search-result-meta">' +
+          catHtml +
+          '<span>' + (post.dateObj ? post.dateObj.display : '') + '</span>' +
+        '</div>' +
+      '</li>';
+    }).join('');
+  }
+})();
+
+
+// ==========================================
 // YAML Frontmatter Parser
 // ==========================================
 

@@ -234,37 +234,6 @@ img {
   gap: 12px;
 }
 
-.header-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-accent);
-  text-decoration: none;
-  border: 2px solid var(--color-accent-dim);
-  box-shadow: 0 0 12px var(--color-accent-glow);
-  background: rgba(106, 143, 160, 0.08);
-  transition: all var(--transition-fast);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.header-avatar:hover {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 20px var(--color-accent-glow);
-  background: rgba(106, 143, 160, 0.15);
-}
-
-.header-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .site-title {
   font-size: 1.2rem;
   font-weight: 800;
@@ -347,6 +316,155 @@ img {
   opacity: 1;
 }
 
+/* Search toggle button */
+.search-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  margin-left: 8px;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+
+.search-toggle:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+}
+
+/* Search overlay */
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 20, 17, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 200;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 120px 24px 40px;
+  overflow-y: auto;
+}
+
+[data-theme="light"] .search-overlay {
+  background: rgba(240, 237, 230, 0.88);
+}
+
+.search-overlay.open {
+  display: flex;
+}
+
+.search-overlay-inner {
+  width: 100%;
+  max-width: 680px;
+}
+
+.search-overlay input {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color var(--transition);
+  font-family: inherit;
+}
+
+.search-overlay input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 24px var(--color-accent-glow);
+}
+
+.search-overlay input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.search-close {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+
+.search-close:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+}
+
+/* Search results */
+.search-results {
+  margin-top: 24px;
+  list-style: none;
+}
+
+.search-results .search-result-item {
+  padding: 16px 20px;
+  margin-bottom: 8px;
+  background: var(--color-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.search-results .search-result-item:hover {
+  border-color: var(--color-border-hover);
+  background: var(--color-surface-hover);
+  transform: translateX(4px);
+}
+
+.search-results .search-result-item a {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--color-text);
+}
+
+.search-results .search-result-item:hover a {
+  color: var(--color-accent);
+}
+
+.search-results .search-result-meta {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-results .search-result-meta .result-category {
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+
+.search-results .no-results {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 48px 0;
+  font-size: 0.9375rem;
+}
+
 /* Hamburger menu */
 .menu-toggle {
   display: none;
@@ -392,21 +510,6 @@ img {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-
-/* Large decorative character */
-.hero::before {
-  content: '眠';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: clamp(200px, 40vw, 500px);
-  font-weight: 900;
-  color: rgba(106, 143, 160, 0.035);
-  pointer-events: none;
-  line-height: 1;
-  user-select: none;
 }
 
 /* Hero glow gradient */
