@@ -1,11 +1,112 @@
+﻿// ==========================================
+// 深度睡眠 · 主脚本
 // ==========================================
-// Star Particle System
-// ==========================================
+
+/* ---------- 工具函数 ---------- */
+
+function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+function $$(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
+
+function html(str) {
+  var t = document.createElement('template');
+  t.innerHTML = str.trim();
+  return t.content.firstChild;
+}
+
+var _fetchCache = {};
+
+function cachedFetch(url) {
+  if (_fetchCache[url]) return _fetchCache[url];
+  return _fetchCache[url] = fetch(url).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  });
+}
+
+function parseFrontmatter(text) {
+  var meta = {}, body = text;
+  var m = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  if (m) {
+    body = m[2];
+    (m[1].match(/(.+?):\s*(.*)/g) || []).forEach(function(line) {
+      var idx = line.indexOf(':');
+      var key = line.slice(0, idx).trim();
+      var val = line.slice(idx + 1).trim();
+      if (val.startsWith('[') && val.endsWith(']')) {
+        val = val.slice(1, -1).split(',').map(function(s) { return s.trim().replace(/^['"]|['"]$/g, ''); });
+      } else {
+        val = val.replace(/^['"]|['"]$/g, '');
+      }
+      meta[key] = val;
+    });
+  }
+  return { meta: meta, body: body };
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return { display: '', monthYear: '', day: '' };
+  var d = new Date(dateStr);
+  if (isNaN(d.getTime())) return { display: dateStr, monthYear: dateStr, day: '' };
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var m = months[d.getMonth()];
+  return {
+    display: m + ' ' + d.getDate() + ', ' + d.getFullYear(),
+    monthYear: m + ' ' + d.getFullYear(),
+    day: d.getDate() + ''
+  };
+}
+
+function postUrl(slug) {
+  return 'post.html?slug=' + encodeURIComponent(slug);
+}
+
+/* ---------- 文章数据 ---------- */
+
+var POST_SLUGS = [
+  '删除-Win10-中网络名称后边的数字',
+  '开启Windows10和11系统隐藏的高性能模式',
+  '隐藏Windows安全通知',
+  '解决猎杀对决启动游戏黑屏的问题'
+];
+
+var _postsCache = null;
+
+async function getPosts() {
+  if (_postsCache) return _postsCache;
+  var posts = [];
+  for (var i = 0; i < POST_SLUGS.length; i++) {
+    var slug = POST_SLUGS[i];
+    try {
+      var mdText = await cachedFetch('posts/' + encodeURIComponent(slug) + '.md');
+      var parsed = parseFrontmatter(mdText);
+      var meta = parsed.meta;
+      var categories = meta.categories || meta.category || [];
+      if (typeof categories === 'string') categories = [categories];
+      var tags = meta.tags || [];
+      if (typeof tags === 'string') tags = [tags];
+      var dateObj = formatDate(meta.date);
+      posts.push({
+        slug: slug,
+        title: meta.title || slug,
+        date: meta.date || '',
+        dateObj: dateObj,
+        categories: categories,
+        tags: tags,
+        excerpt: meta.excerpt || ''
+      });
+    } catch(e) { /* 跳过失败 */ }
+  }
+  posts.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  _postsCache = posts;
+  return posts;
+}
+
+/* ---------- Starry Sky ---------- */
 
 (function initStars() {
   var sky = document.getElementById('starry-sky');
   if (!sky) return;
-  var fragment = document.createDocumentFragment();
+  var frag = document.createDocumentFragment();
   for (var i = 0; i < 80; i++) {
     var star = document.createElement('div');
     star.className = 'star';
@@ -18,122 +119,67 @@
       'animation-delay:' + (Math.random() * 6) + 's;' +
       'animation-duration:' + (2 + Math.random() * 4) + 's;' +
       (isAccent ? 'background:rgba(106,143,160,0.6);box-shadow:0 0 4px rgba(106,143,160,0.3);' : '');
-    fragment.appendChild(star);
+    frag.appendChild(star);
   }
-  sky.appendChild(fragment);
+  sky.appendChild(frag);
 })();
 
+/* ---------- 主题切换 ---------- */
 
-// ==========================================
-// Mobile Menu Toggle
-// ==========================================
-
-(function initMenu() {
-  var toggle = document.querySelector('.menu-toggle');
-  var nav = document.querySelector('.nav-links');
-  if (!toggle || !nav) return;
-
-  toggle.addEventListener('click', function () {
-    nav.classList.toggle('open');
-    toggle.classList.toggle('active');
-  });
-
-  nav.querySelectorAll('a').forEach(function (link) {
-    link.addEventListener('click', function () {
-      nav.classList.remove('open');
-      toggle.classList.remove('active');
-    });
-  });
-
-  document.addEventListener('click', function (e) {
-    if (!e.target.closest('.header-inner')) {
-      nav.classList.remove('open');
-      toggle.classList.remove('active');
-    }
-  });
-})();
-
-
-// ==========================================
-// Dark / Light Mode Toggle
-// ==========================================
-
-(function initThemeToggle() {
-  var html = document.documentElement;
+(function initTheme() {
+  var htmlEl = document.documentElement;
   var stored = localStorage.getItem('theme');
+  if (stored === 'light') htmlEl.setAttribute('data-theme', 'light');
 
-  if (stored === 'light') {
-    html.setAttribute('data-theme', 'light');
-  }
+  var btn = document.createElement('button');
+  btn.className = 'theme-toggle';
+  btn.setAttribute('aria-label', '切换主题');
 
-  var toggle = document.createElement('button');
-  toggle.className = 'theme-toggle';
-  toggle.setAttribute('aria-label', '切换主题');
-  toggle.textContent = stored === 'light' ? '暗' : '明';
-
-  // Update star colors when theme changes
-  function updateStars(isLight) {
-    var stars = document.querySelectorAll('.star');
-    stars.forEach(function (s) {
-      if (isLight) {
-        s.style.background = 'rgba(82,122,140,0.25)';
-        s.style.boxShadow = 'none';
-      } else {
-        s.style.background = 'rgba(106,143,160,0.5)';
-        s.style.boxShadow = Math.random() > 0.7 ? '0 0 4px rgba(106,143,160,0.3)' : 'none';
-      }
-    });
-  }
-
-  var headerRight = document.querySelector('.header-right');
-  if (headerRight) {
-    headerRight.appendChild(toggle);
-  }
-
-  toggle.addEventListener('click', function () {
-    var isDark = html.getAttribute('data-theme') !== 'light';
-    if (isDark) {
-      html.setAttribute('data-theme', 'light');
+  function setTheme(light) {
+    if (light) {
+      htmlEl.setAttribute('data-theme', 'light');
       localStorage.setItem('theme', 'light');
-      toggle.textContent = '暗';
-      updateStars(true);
     } else {
-      html.removeAttribute('data-theme');
+      htmlEl.removeAttribute('data-theme');
       localStorage.setItem('theme', 'dark');
-      toggle.textContent = '明';
-      updateStars(false);
     }
+    btn.textContent = light ? '暗' : '明';
+  }
+
+  setTheme(stored === 'light');
+
+  var right = $('.header-right');
+  if (right) right.appendChild(btn);
+
+  btn.addEventListener('click', function() {
+    setTheme(htmlEl.getAttribute('data-theme') !== 'light');
   });
 })();
 
-
-// ==========================================
-// Search Overlay
-// ==========================================
+/* ---------- 搜索 ---------- */
 
 (function initSearch() {
-  var headerRight = document.querySelector('.header-right');
-  if (!headerRight) return;
+  var right = $('.header-right');
+  if (!right) return;
 
-  // Create toggle button
-  var toggle = document.createElement('button');
-  toggle.className = 'search-toggle';
-  toggle.setAttribute('aria-label', '搜索');
-  toggle.innerHTML =
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
-      '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>' +
-    '</svg>';
-  headerRight.appendChild(toggle);
+  var toggleBtn = html(
+    '<button class="search-toggle" aria-label="搜索">' +
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+        '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>' +
+      '</svg>' +
+    '</button>'
+  );
+  right.appendChild(toggleBtn);
 
-  // Build overlay
-  var overlay = document.createElement('div');
-  overlay.className = 'search-overlay';
-  overlay.innerHTML =
-    '<div class="search-overlay-inner">' +
-      '<input type="text" class="search-input" placeholder="搜索文章..." autofocus>' +
-      '<ul class="search-results"></ul>' +
-    '</div>' +
-    '<button class="search-close" aria-label="关闭搜索">\u2715</button>';
+  var overlay = html(
+    '<div class="search-overlay">' +
+      '<div class="search-overlay-inner">' +
+        '<input type="text" class="search-input" placeholder="搜索文章..." autofocus>' +
+        '<ul class="search-results"></ul>' +
+      '</div>' +
+      '<button class="search-close" aria-label="关闭搜索">✕</button>' +
+    '</div>'
+  );
   document.body.appendChild(overlay);
 
   var input = overlay.querySelector('.search-input');
@@ -143,7 +189,7 @@
   function open() {
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
-    setTimeout(function () { input.focus(); }, 100);
+    setTimeout(function() { input.focus(); }, 100);
   }
 
   function closeSearch() {
@@ -153,293 +199,187 @@
     results.innerHTML = '';
   }
 
-  toggle.addEventListener('click', open);
-  close.addEventListener('click', closeSearch);
+  toggleBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (overlay.classList.contains('open')) { closeSearch(); return; }
+    open();
+  });
 
-  overlay.addEventListener('click', function (e) {
+  close.addEventListener('click', closeSearch);
+  overlay.addEventListener('click', function(e) {
     if (e.target === overlay) closeSearch();
   });
 
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && overlay.classList.contains('open')) closeSearch();
-    if (e.key === '/' && !overlay.classList.contains('open') && !e.target.matches('input, textarea')) {
-      e.preventDefault();
-      open();
-    }
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeSearch();
   });
 
-  // Debounced search
-  var debounceTimer;
-  input.addEventListener('input', function () {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(performSearch, 200);
+  var searchTimer;
+  input.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    var q = input.value.trim().toLowerCase();
+    searchTimer = setTimeout(function() {
+      if (q.length < 1) { results.innerHTML = ''; return; }
+      getPosts().then(function(posts) {
+        var matched = posts.filter(function(p) {
+          return p.title.toLowerCase().indexOf(q) !== -1 ||
+            p.excerpt.toLowerCase().indexOf(q) !== -1 ||
+            p.tags.some(function(t) { return t.toLowerCase().indexOf(q) !== -1; }) ||
+            p.categories.some(function(c) { return c.toLowerCase().indexOf(q) !== -1; });
+        });
+        results.innerHTML = !matched.length
+          ? '<li class="search-no-results">未找到相关文章</li>'
+          : matched.map(function(p) {
+              return '<li><a href="' + postUrl(p.slug) + '">' +
+                '<span class="search-result-title">' + p.title + '</span>' +
+                '<span class="search-result-meta">' + p.dateObj.display + (p.categories.length ? ' · ' + p.categories.join(', ') : '') + '</span>' +
+              '</a></li>';
+            }).join('');
+      });
+    }, 150);
   });
-
-  function performSearch() {
-    var query = input.value.trim().toLowerCase();
-    if (!query) {
-      results.innerHTML = '';
-      return;
-    }
-
-    // Get posts from cache
-    if (typeof postsCache === 'undefined' || !postsCache) {
-      results.innerHTML = '<li class="no-results">加载文章中...</li>';
-      return;
-    }
-
-    var filtered = postsCache.filter(function (post) {
-      return (post.title && post.title.toLowerCase().indexOf(query) !== -1) ||
-             (post.categories && post.categories.some(function (c) { return c.toLowerCase().indexOf(query) !== -1; })) ||
-             (post.tags && post.tags.some(function (t) { return t.toLowerCase().indexOf(query) !== -1; })) ||
-             (post.excerpt && post.excerpt.toLowerCase().indexOf(query) !== -1);
-    }).slice(0, 20);
-
-    if (!filtered.length) {
-      results.innerHTML = '<li class="no-results">未找到匹配的文章</li>';
-      return;
-    }
-
-    results.innerHTML = filtered.map(function (post) {
-      var catHtml = post.categories && post.categories.length
-        ? '<span class="result-category">' + post.categories.join(', ') + '</span>'
-        : '';
-      return '<li class="search-result-item">' +
-        '<a href="' + postUrl(post.slug) + '">' + post.title + '</a>' +
-        '<div class="search-result-meta">' +
-          catHtml +
-          '<span>' + (post.dateObj ? post.dateObj.display : '') + '</span>' +
-        '</div>' +
-      '</li>';
-    }).join('');
-  }
 })();
 
+/* ---------- 移动端菜单 ---------- */
 
-// ==========================================
-// YAML Frontmatter Parser
-// ==========================================
+(function initMenu() {
+  var toggle = $('.menu-toggle');
+  var nav = $('.nav-links');
+  if (!toggle || !nav) return;
 
-function parseFrontmatter(mdText) {
-  var meta = { title: '', categories: [], date: '', tags: [], excerpt: '' };
-  var match = mdText.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
-  if (!match) return { meta: meta, body: mdText };
+  function close() {
+    nav.classList.remove('open');
+    toggle.classList.remove('active');
+  }
 
-  var yaml = match[1];
-  var body = mdText.slice(match[0].length);
-
-  yaml.split('\n').forEach(function (line) {
-    var sep = line.indexOf(': ');
-    if (sep === -1) return;
-    var key = line.slice(0, sep).trim();
-    var val = line.slice(sep + 2).trim();
-
-    if (key === 'tags') {
-      val = val.replace(/^\[|\]$/g, '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
-      meta.tags = val;
-    } else if (key === 'categories') {
-      var cats = val.replace(/^\[|\]$/g, '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
-      meta.categories = cats.length ? cats : [''];
-    } else if (key === 'title' || key === 'category' || key === 'date' || key === 'excerpt') {
-      meta[key] = val;
-    }
+  toggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    nav.classList.toggle('open');
+    toggle.classList.toggle('active');
   });
 
-  return { meta: meta, body: body };
-}
+  $$('a', nav).forEach(function(link) {
+    link.addEventListener('click', close);
+  });
 
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.header-inner')) close();
+  });
+})();
 
-// ==========================================
-// Date Formatting
-// ==========================================
+/* ---------- 渲染首页 ---------- */
 
-function formatDate(dateStr) {
-  var date = new Date(dateStr);
-  if (isNaN(date.getTime())) {
-    return { display: dateStr, monthYear: dateStr, day: '' };
-  }
-  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var month = months[date.getMonth()];
-  var year = date.getFullYear();
-  var day = date.getDate();
-  return {
-    display: month + ' ' + day + ', ' + year,
-    monthYear: month + ' ' + year,
-    day: String(day)
-  };
-}
-
-
-// ==========================================
-// Blog Data Engine
-// ==========================================
-
-var POSTS_JSON = 'posts/posts.json';
-var postsCache = null;
-
-async function fetchPosts(force) {
-  if (postsCache && !force) return postsCache;
-
-  try {
-    var res = await fetch(POSTS_JSON);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    var slugs = await res.json();
-
-    var posts = [];
-    for (var i = 0; i < slugs.length; i++) {
-      try {
-        var mdRes = await fetch('posts/' + slugs[i] + '.md');
-        if (!mdRes.ok) continue;
-        var mdText = await mdRes.text();
-        var parsed = parseFrontmatter(mdText);
-        posts.push({ slug: slugs[i], dateObj: formatDate(parsed.meta.date), ...parsed.meta });
-      } catch (err) {
-        console.warn('Failed to load ' + slugs[i] + '.md:', err);
-      }
-    }
-
-    postsCache = posts;
-    return posts;
-  } catch (err) {
-    console.error('Failed to load posts:', err);
-    return [];
-  }
-}
-
-function getSlug() {
-  var params = new URLSearchParams(window.location.search);
-  return params.get('slug');
-}
-
-function postUrl(slug) {
-  return 'post.html?slug=' + encodeURIComponent(slug);
-}
-
-
-// ==========================================
-// Index Page: Render Post List
-// ==========================================
-
-async function initIndex() {
+async function renderIndex() {
   var container = document.getElementById('post-list');
   if (!container) return;
-
-  var posts = await fetchPosts();
+  var posts = await getPosts();
   if (!posts.length) {
-    container.innerHTML = '<p style="color:var(--color-text-muted);text-align:center;padding:48px 0;">暂无文章</p>';
+    container.innerHTML = '<p style="color:var(--color-text-muted);text-align:center;padding:64px 0;">暂无文章</p>';
     return;
   }
-
-  container.innerHTML = posts.map(function (post) {
+  container.innerHTML = posts.map(function(p) {
     return '<article class="post-card">' +
-      '<div class="post-meta">' +
-        '<span class="post-category">' + post.categories.join(', ') + '</span>' +
-        '<span style="color:var(--color-text-muted)">' + post.dateObj.display + '</span>' +
+      '<div class="post-card-meta">' +
+        '<span class="post-category">' + p.categories.join(', ') + '</span>' +
+        '<time>' + p.dateObj.display + '</time>' +
       '</div>' +
-      '<h2><a href="' + postUrl(post.slug) + '">' + post.title + '</a></h2>' +
-      '<p class="post-excerpt">' + post.excerpt + '</p>' +
-      '<a href="' + postUrl(post.slug) + '" class="read-more">阅读全文</a>' +
+      '<h2><a href="' + postUrl(p.slug) + '">' + p.title + '</a></h2>' +
+      (p.excerpt ? '<p>' + p.excerpt + '</p>' : '') +
+      '<div class="post-card-tags">' +
+        p.tags.map(function(t) { return '<span class="tag">#' + t + '</span>'; }).join('') +
+      '</div>' +
     '</article>';
   }).join('');
 }
 
+/* ---------- 渲染侧边栏 ---------- */
 
-// ==========================================
-// Sidebar: Categories, Recent Posts, Tags
-// ==========================================
+async function renderSidebar() {
+  var posts = await getPosts();
 
-async function initSidebar() {
-  var sidebar = document.querySelector('.sidebar');
-  if (!sidebar) return;
-
-  var posts = await fetchPosts();
-  if (!posts.length) return;
-
-  // Categories
-  var catWidget = sidebar.querySelector('#sidebar-categories');
-  if (catWidget) {
+  // 分类
+  var catEl = document.getElementById('sidebar-categories');
+  if (catEl) {
     var catMap = {};
-    posts.forEach(function (p) {
-      p.categories.forEach(function (cat) {
-        catMap[cat] = (catMap[cat] || 0) + 1;
-      });
-    });
-    catWidget.innerHTML = Object.entries(catMap).map(function (pair) {
-      return '<li><a href="#">' + pair[0] + '</a><span class="count">' + pair[1] + '</span></li>';
+    posts.forEach(function(p) { p.categories.forEach(function(c) { catMap[c] = (catMap[c] || 0) + 1; }); });
+    var cats = Object.keys(catMap).sort();
+    catEl.innerHTML = cats.length
+      ? cats.map(function(c) {
+          return '<li><a href="?category=' + encodeURIComponent(c) + '">' + c + ' <span class="cat-count">' + catMap[c] + '</span></a></li>';
+        }).join('')
+      : '<li style="color:var(--color-text-muted);font-size:0.875rem;">暂无分类</li>';
+  }
+
+  // 最近文章
+  var recentEl = document.getElementById('sidebar-recent');
+  if (recentEl) {
+    recentEl.innerHTML = posts.slice(0, 5).map(function(p) {
+      return '<li><a href="' + postUrl(p.slug) + '">' + p.title + '</a></li>';
     }).join('');
   }
 
-  // Recent posts
-  var recentWidget = sidebar.querySelector('#sidebar-recent');
-  if (recentWidget) {
-    var recent = posts.slice(0, 5);
-    recentWidget.innerHTML = recent.map(function (p) {
-      return '<li>' +
-        '<div class="recent-title"><a href="' + postUrl(p.slug) + '">' + p.title + '</a></div>' +
-        '<div class="recent-date">' + p.dateObj.display + '</div>' +
-      '</li>';
-    }).join('');
-  }
-
-  // Tags
-  var tagsWidget = sidebar.querySelector('#sidebar-tags');
-  if (tagsWidget) {
-    var tagSet = new Set();
-    posts.forEach(function (p) { p.tags.forEach(function (t) { tagSet.add(t); }); });
-    tagsWidget.innerHTML = Array.from(tagSet).map(function (tag) {
-      return '<a href="#">' + tag + '</a>';
-    }).join('');
+  // 标签云
+  var tagEl = document.getElementById('sidebar-tags');
+  if (tagEl) {
+    var tagMap = {};
+    posts.forEach(function(p) { p.tags.forEach(function(t) { tagMap[t] = (tagMap[t] || 0) + 1; }); });
+    var tags = Object.keys(tagMap).sort();
+    tagEl.innerHTML = tags.length
+      ? tags.map(function(t) {
+          var count = tagMap[t];
+          var size = count <= 1 ? '0.8rem' : count <= 2 ? '0.9rem' : '1rem';
+          return '<a href="?tag=' + encodeURIComponent(t) + '" style="font-size:' + size + ';opacity:' + Math.min(1, 0.5 + count * 0.2) + '">#' + t + '</a>';
+        }).join('')
+      : '<span style="color:var(--color-text-muted);font-size:0.875rem;">暂无标签</span>';
   }
 }
 
+/* ---------- 渲染文章详情 ---------- */
 
-// ==========================================
-// Post Page: Load and Render Markdown
-// ==========================================
-
-async function initPost() {
+async function renderPost() {
   var container = document.getElementById('post-content');
   if (!container) return;
 
-  var slug = getSlug();
+  var params = new URLSearchParams(window.location.search);
+  var slug = params.get('slug');
   if (!slug) {
     container.innerHTML = '<p style="color:var(--color-text-muted)">未指定文章</p>';
     return;
   }
 
   try {
-    var mdRes = await fetch('posts/' + slug + '.md');
-    if (!mdRes.ok) throw new Error('HTTP ' + mdRes.status);
-    var mdText = await mdRes.text();
-
+    var mdText = await cachedFetch('posts/' + encodeURIComponent(slug) + '.md');
     var parsed = parseFrontmatter(mdText);
     var meta = parsed.meta;
-    var body = parsed.body;
 
     document.title = (meta.title || slug) + ' — 深度睡眠';
     var metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.content = meta.excerpt || '';
 
+    var categories = meta.categories || meta.category || [];
+    if (typeof categories === 'string') categories = [categories];
+    var fd = formatDate(meta.date);
+
     var headerEl = document.getElementById('post-header');
-    var fmDate = formatDate(meta.date);
     if (headerEl) {
       headerEl.innerHTML =
         '<div class="post-meta">' +
-          '<span class="post-category">' + (meta.categories ? meta.categories.join(', ') : '') + '</span>' +
-          '<span style="color:var(--color-text-muted)">' + ' · ' + fmDate.display + '</span>' +
+          '<span class="post-category">' + categories.join(', ') + '</span>' +
+          '<span style="color:var(--color-text-muted)"> · ' + fd.display + '</span>' +
         '</div>' +
         '<h1>' + (meta.title || slug) + '</h1>';
     }
 
-    container.innerHTML = marked.parse(body);
+    container.innerHTML = marked.parse(parsed.body);
 
     if (typeof hljs !== 'undefined') {
-      container.querySelectorAll('pre code').forEach(function (block) { hljs.highlightElement(block); });
+      $$('pre code', container).forEach(function(block) { hljs.highlightElement(block); });
     }
-    container.querySelectorAll('img').forEach(function (img) { img.loading = 'lazy'; });
+    $$('img', container).forEach(function(img) { img.loading = 'lazy'; });
 
-    var posts = await fetchPosts();
-    var idx = posts.findIndex(function (p) { return p.slug === slug; });
+    // 上下篇导航
+    var posts = await getPosts();
+    var idx = posts.findIndex(function(p) { return p.slug === slug; });
     var prev = idx > 0 ? posts[idx - 1] : null;
     var next = (idx < posts.length - 1 && idx !== -1) ? posts[idx + 1] : null;
 
@@ -447,53 +387,43 @@ async function initPost() {
     if (navEl) {
       navEl.innerHTML =
         (prev
-          ? '<a href="' + postUrl(prev.slug) + '" class="prev">' +
-            '<span class="nav-label">\u2190 上一篇</span>' + prev.title +
-          '</a>'
+          ? '<a href="' + postUrl(prev.slug) + '" class="prev"><span class="nav-label">← 上一篇</span>' + prev.title + '</a>'
           : '<div></div>') +
         (next
-          ? '<a href="' + postUrl(next.slug) + '" class="next">' +
-            '<span class="nav-label">下一篇 \u2192</span>' + next.title +
-          '</a>'
+          ? '<a href="' + postUrl(next.slug) + '" class="next"><span class="nav-label">下一篇 →</span>' + next.title + '</a>'
           : '<div></div>');
     }
-  } catch (err) {
+  } catch(err) {
     console.error('Failed to load post:', err);
     container.innerHTML = '<p style="color:var(--color-text-muted)">文章未找到</p>';
   }
 }
 
+/* ---------- 渲染归档 ---------- */
 
-// ==========================================
-// Archive Page: Group Posts by Month
-// ==========================================
-
-async function initArchive() {
+async function renderArchive() {
   var container = document.getElementById('archive-list');
   if (!container) return;
-
-  var posts = await fetchPosts();
+  var posts = await getPosts();
   if (!posts.length) {
     container.innerHTML = '<p style="color:var(--color-text-muted);text-align:center;padding:48px 0;">暂无文章</p>';
     return;
   }
 
   var groups = {};
-  posts.forEach(function (p) {
+  posts.forEach(function(p) {
     var key = p.dateObj.monthYear;
     if (!groups[key]) groups[key] = [];
     groups[key].push(p);
   });
 
-  var sortedMonths = Object.keys(groups).sort(function (a, b) {
-    return new Date(b) - new Date(a);
-  });
+  var sortedMonths = Object.keys(groups).sort(function(a, b) { return new Date(b) - new Date(a); });
 
-  container.innerHTML = sortedMonths.map(function (month) {
+  container.innerHTML = sortedMonths.map(function(month) {
     return '<div class="archive-month">' +
       '<h2 class="archive-month-title">' + month + '</h2>' +
       '<ul class="archive-list">' +
-        groups[month].map(function (p) {
+        groups[month].map(function(p) {
           return '<li class="archive-item">' +
             '<span class="archive-day">' + p.dateObj.day + '</span>' +
             '<a href="' + postUrl(p.slug) + '">' + p.title + '</a>' +
@@ -505,55 +435,33 @@ async function initArchive() {
   }).join('');
 }
 
-
-// ==========================================
-// Scroll Effects: Header Shadow + Progress
-// ==========================================
+/* ---------- 阅读进度 & 头部阴影 ---------- */
 
 (function initScrollEffects() {
-  var header = document.querySelector('.site-header');
-  var progressBar = document.querySelector('.progress-bar');
+  var header = $('.site-header');
+  var progressBar = $('.progress-bar');
   var ticking = false;
 
-  window.addEventListener('scroll', function () {
-    if (!ticking) {
-      requestAnimationFrame(function () {
-        var scrollY = window.scrollY;
-
-        if (header) {
-          header.classList.toggle('scrolled', scrollY > 10);
-        }
-
-        if (progressBar) {
-          var docHeight = document.documentElement.scrollHeight - window.innerHeight;
-          var progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
-          progressBar.style.width = progress + '%';
-        }
-
-        ticking = false;
-      });
-      ticking = true;
-    }
+  window.addEventListener('scroll', function() {
+    if (ticking) return;
+    requestAnimationFrame(function() {
+      var sy = window.scrollY;
+      if (header) header.classList.toggle('scrolled', sy > 10);
+      if (progressBar) {
+        var docH = document.documentElement.scrollHeight - window.innerHeight;
+        progressBar.style.width = (docH > 0 ? (sy / docH) * 100 : 0) + '%';
+      }
+      ticking = false;
+    });
+    ticking = true;
   });
 })();
 
+/* ---------- 启动 ---------- */
 
-// ==========================================
-// Page Initialization
-// ==========================================
-
-document.addEventListener('DOMContentLoaded', function () {
-  initSidebar();
-
-  if (document.getElementById('post-list')) {
-    initIndex();
-  }
-
-  if (document.getElementById('post-content')) {
-    initPost();
-  }
-
-  if (document.getElementById('archive-list')) {
-    initArchive();
-  }
+document.addEventListener('DOMContentLoaded', function() {
+  renderSidebar();
+  if (document.getElementById('post-list')) renderIndex();
+  if (document.getElementById('post-content')) renderPost();
+  if (document.getElementById('archive-list')) renderArchive();
 });
