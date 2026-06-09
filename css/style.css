@@ -225,19 +225,21 @@ img {
   height: 100%;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  position: relative;
 }
 
 .header-left {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1;
 }
 
 .header-center {
-  display: flex;
-  justify-content: center;
-  flex: 0 0 auto;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
 }
 
 .header-center nav {
@@ -247,9 +249,7 @@ img {
 .header-right {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 8px;
-  flex: 1;
 }
 
 .site-title {
